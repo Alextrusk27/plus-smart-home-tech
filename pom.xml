@@ -23,6 +23,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <lombok.version>1.18.42</lombok.version>
 
         <avro.version>1.11.3</avro.version>
         <kafka-clients.version>3.6.1</kafka-clients.version>
