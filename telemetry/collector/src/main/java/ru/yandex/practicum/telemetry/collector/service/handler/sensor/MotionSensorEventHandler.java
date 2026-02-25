@@ -19,7 +19,7 @@ public class MotionSensorEventHandler extends BaseSensorEventHandler<MotionSenso
 
         return MotionSensorAvro.newBuilder()
                 .setLinkQuality(motionSensorEvent.getLinkQuality())
-                .setMotion(motionSensorEvent.isMotion())
+                .setMotion(motionSensorEvent.getMotion())
                 .setVoltage(motionSensorEvent.getVoltage())
                 .build();
     }
