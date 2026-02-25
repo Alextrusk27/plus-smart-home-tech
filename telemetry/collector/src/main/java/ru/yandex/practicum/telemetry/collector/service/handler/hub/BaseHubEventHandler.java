@@ -26,7 +26,7 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
                 .setPayload(payload)
                 .build();
 
-        producer.send(HUBS_EVENTS, eventAvro);
+        producer.send(HUBS_EVENTS, event.getTimestamp(), event.getHubId(), eventAvro);
     }
 
     abstract T mapToAvro(HubEvent event);

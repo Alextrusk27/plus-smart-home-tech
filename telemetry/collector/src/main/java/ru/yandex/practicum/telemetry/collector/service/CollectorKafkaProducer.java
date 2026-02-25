@@ -3,28 +3,26 @@ package ru.yandex.practicum.telemetry.collector.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.CompletableFuture;
+import java.time.Instant;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CollectorKafkaProducer {
-    private final KafkaTemplate<String, SpecificRecordBase> kafkaTemplate;
+    private final Producer<String, SpecificRecordBase> producer;
 
-    public void send(String topic, SpecificRecordBase message) {
-        CompletableFuture<SendResult<String, SpecificRecordBase>> future = kafkaTemplate.send(topic, message);
-
-        future.whenComplete((result, e) -> {
-            if (e == null) {
-                log.info("Sent message to topic {}: offset = {}",
-                        topic, result.getRecordMetadata().offset());
-            } else {
-                log.error("Failed to send message to topic {}: ", topic, e);
-            }
-        });
+    public void send(String topic, Instant timestamp, String key, SpecificRecordBase message) {
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                topic,
+                null,
+                timestamp.getEpochSecond(),
+                key,
+                message
+        );
+        producer.send(record);
     }
 }

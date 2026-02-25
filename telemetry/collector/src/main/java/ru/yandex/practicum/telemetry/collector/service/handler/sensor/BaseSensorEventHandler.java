@@ -27,7 +27,7 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
                 .setPayload(payload)
                 .build();
 
-        producer.send(SENSORS_EVENTS, eventAvro);
+        producer.send(SENSORS_EVENTS, event.getTimestamp(), event.getHubId(), eventAvro);
     }
 
     protected abstract T mapToAvro(SensorEvent event);
