@@ -1,31 +1,33 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.sensor;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.MotionSensorProto;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro;
-import ru.yandex.practicum.telemetry.collector.dto.sensor.MotionSensorEvent;
-import ru.yandex.practicum.telemetry.collector.dto.sensor.SensorEvent;
-import ru.yandex.practicum.telemetry.collector.dto.sensor.SensorEventType;
+import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.telemetry.collector.service.CollectorKafkaProducer;
 
 @Component
-public class MotionSensorEventHandler extends BaseSensorEventHandler<MotionSensorAvro> {
+public class MotionSensorEventHandler extends BaseSensorEventHandler {
     public MotionSensorEventHandler(CollectorKafkaProducer producer) {
         super(producer);
     }
 
     @Override
-    protected MotionSensorAvro mapToAvro(SensorEvent event) {
-        MotionSensorEvent motionSensorEvent = (MotionSensorEvent) event;
+    protected SensorEventAvro mapToAvro(SensorEventProto event) {
+        MotionSensorProto payloadProto = event.getMotionSensor();
 
-        return MotionSensorAvro.newBuilder()
-                .setLinkQuality(motionSensorEvent.getLinkQuality())
-                .setMotion(motionSensorEvent.getMotion())
-                .setVoltage(motionSensorEvent.getVoltage())
+        return initBuilder(event)
+                .setPayload(MotionSensorAvro.newBuilder()
+                        .setLinkQuality(payloadProto.getLinkQuality())
+                        .setMotion(payloadProto.getMotion())
+                        .setVoltage(payloadProto.getVoltage())
+                        .build())
                 .build();
     }
 
     @Override
-    public SensorEventType getMessageType() {
-        return SensorEventType.MOTION_SENSOR_EVENT;
+    public SensorEventProto.PayloadCase getMessageType() {
+        return SensorEventProto.PayloadCase.MOTION_SENSOR;
     }
 }
