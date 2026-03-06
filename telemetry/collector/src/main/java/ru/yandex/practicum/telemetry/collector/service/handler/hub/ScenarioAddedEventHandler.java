@@ -10,6 +10,8 @@ import ru.yandex.practicum.telemetry.collector.service.CollectorKafkaProducer;
 
 import java.util.List;
 
+import static ru.yandex.practicum.grpc.telemetry.event.ScenarioConditionProto.ValueCase.BOOL_VALUE;
+
 @Component
 public class ScenarioAddedEventHandler extends BaseHubEventHandler {
     public ScenarioAddedEventHandler(CollectorKafkaProducer producer) {
@@ -61,13 +63,11 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler {
                 .build();
     }
 
-    private Object mapValue(ScenarioConditionProto condition) {
-        if (condition.hasBoolValue()) {
-            return condition.getBoolValue();
-        } else if (condition.hasIntValue()) {
-            return condition.getIntValue();
-        } else {
-            return null;
-        }
+    private Integer mapValue(ScenarioConditionProto condition) {
+        return switch (condition.getValueCase()) {
+            case INT_VALUE -> condition.getIntValue();
+            case BOOL_VALUE -> condition.getBoolValue() ? 1 : 0;
+            case VALUE_NOT_SET -> null;
+        };
     }
 }
