@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.collector.utils;
+package ru.yandex.practicum.utils;
 
 public interface KafkaTopics {
     String HUBS_EVENTS = "telemetry.hubs.v1";
