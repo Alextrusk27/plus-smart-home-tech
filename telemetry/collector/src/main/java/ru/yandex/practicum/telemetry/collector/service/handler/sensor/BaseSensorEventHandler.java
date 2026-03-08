@@ -14,7 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 
-import static ru.yandex.practicum.telemetry.collector.utils.KafkaTopics.SENSORS_EVENTS;
+import static ru.yandex.practicum.utils.KafkaTopics.SENSORS_EVENTS;
 
 @Slf4j
 @RequiredArgsConstructor
