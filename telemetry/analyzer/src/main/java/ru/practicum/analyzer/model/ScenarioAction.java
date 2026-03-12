@@ -7,9 +7,8 @@ import lombok.*;
 @Setter
 @Entity
 @Table(name = "scenario_actions")
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class ScenarioAction {
     @EmbeddedId
     private ScenarioActionId id;
@@ -28,4 +27,12 @@ public class ScenarioAction {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "action_id", nullable = false)
     private Action action;
+
+    @Builder
+    public ScenarioAction(ScenarioActionId id, Scenario scenario, Sensor sensor, Action action) {
+        this.id = id;
+        this.scenario = scenario;
+        this.sensor = sensor;
+        this.action = action;
+    }
 }

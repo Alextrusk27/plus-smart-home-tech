@@ -1,26 +1,46 @@
 package ru.practicum.analyzer.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "conditions")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class Condition {
+
+    public enum Type {
+        MOTION,
+        LUMINOSITY,
+        SWITCH,
+        TEMPERATURE,
+        CO2LEVEL,
+        HUMIDITY
+    }
+
+    public enum Operation {
+        EQUALS,
+        GREATER_THAN,
+        LOWER_THAN
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "type", nullable = false)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     @Column(name = "operation", nullable = false)
-    private String operation;
+    @Enumerated(EnumType.STRING)
+    private Operation operation;
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "value")
     private Integer value;
 }

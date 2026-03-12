@@ -1,4 +1,4 @@
-package ru.practicum.analyzer.service;
+package ru.practicum.analyzer.controller;
 
 import org.springframework.stereotype.Service;
 

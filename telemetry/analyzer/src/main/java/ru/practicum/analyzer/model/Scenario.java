@@ -1,15 +1,17 @@
 package ru.practicum.analyzer.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "scenarios")
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class Scenario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

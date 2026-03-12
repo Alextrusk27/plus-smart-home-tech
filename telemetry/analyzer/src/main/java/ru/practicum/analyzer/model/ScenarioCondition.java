@@ -7,9 +7,8 @@ import lombok.*;
 @Setter
 @Entity
 @Table(name = "scenario_conditions")
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class ScenarioCondition {
     @EmbeddedId
     private ScenarioConditionId id;
@@ -28,4 +27,12 @@ public class ScenarioCondition {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "condition_id", nullable = false)
     private Condition condition;
+
+    @Builder
+    public ScenarioCondition(ScenarioConditionId id, Scenario scenario, Sensor sensor, Condition condition) {
+        this.id = id;
+        this.scenario = scenario;
+        this.sensor = sensor;
+        this.condition = condition;
+    }
 }

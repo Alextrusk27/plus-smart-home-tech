@@ -11,10 +11,9 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Embeddable
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class ScenarioActionId implements Serializable {
     @Serial
     private static final long serialVersionUID = 9077290984701896027L;
@@ -30,4 +29,11 @@ public class ScenarioActionId implements Serializable {
     @NotNull
     @Column(name = "action_id", nullable = false)
     private Long actionId;
+
+    @Builder
+    public ScenarioActionId(Long scenarioId, String sensorId, Long actionId) {
+        this.scenarioId = scenarioId;
+        this.sensorId = sensorId;
+        this.actionId = actionId;
+    }
 }

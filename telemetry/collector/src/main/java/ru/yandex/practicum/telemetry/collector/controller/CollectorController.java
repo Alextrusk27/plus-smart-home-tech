@@ -56,8 +56,6 @@ public class CollectorController extends CollectorControllerGrpc.CollectorContro
     @Override
     public void collectHubEvent(HubEventProto request, StreamObserver<Empty> responseObserver) {
         try {
-//            log.info("Collecting hub event {}", request);
-
             if (request.hasScenarioAdded()) {
                 log.warn("Collecting hub event {}", request);
             }
