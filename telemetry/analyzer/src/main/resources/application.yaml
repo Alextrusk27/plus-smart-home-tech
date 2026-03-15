@@ -4,14 +4,15 @@ spring:
   main:
     web-application-type: none
   datasource:
+    initialization-mode: always
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/analyzer_db
     username: ${DB_USER:analyzer}
     password: ${DB_PASSWORD:analyzer}
 
-logging:
-  level:
-    ru.practicum: DEBUG
+  sql:
+    init:
+      mode: always
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -19,6 +20,10 @@ logging:
       hibernate:
         ddl-auto: validate
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    ru.practicum: DEBUG
 
 kafka:
   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
