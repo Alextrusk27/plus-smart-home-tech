@@ -10,8 +10,6 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 public interface ConditionMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "type", source = "type")
-    @Mapping(target = "operation", source = "operation")
     @Mapping(target = "value", source = "value", qualifiedByName = "valueToInteger")
     Condition toEntity(ScenarioConditionAvro scenarioConditionAvro);
 

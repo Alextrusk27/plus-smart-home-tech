@@ -26,7 +26,15 @@ public class Condition {
     public enum Operation {
         EQUALS,
         GREATER_THAN,
-        LOWER_THAN
+        LOWER_THAN;
+
+        public boolean evaluate(int sensorValue, int conditionValue) {
+            return switch (this) {
+                case EQUALS -> sensorValue == conditionValue;
+                case GREATER_THAN -> sensorValue > conditionValue;
+                case LOWER_THAN -> sensorValue < conditionValue;
+            };
+        }
     }
 
     @Id

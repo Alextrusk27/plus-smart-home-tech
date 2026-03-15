@@ -7,14 +7,19 @@ import org.springframework.stereotype.Component;
 import ru.practicum.analyzer.mapper.ActionMapper;
 import ru.practicum.analyzer.mapper.ConditionMapper;
 import ru.practicum.analyzer.mapper.ScenarioMapper;
-import ru.practicum.analyzer.model.*;
-import ru.practicum.analyzer.repository.*;
+import ru.practicum.analyzer.model.Action;
+import ru.practicum.analyzer.model.Condition;
+import ru.practicum.analyzer.model.Scenario;
+import ru.practicum.analyzer.repository.ActionRepository;
+import ru.practicum.analyzer.repository.ConditionRepository;
+import ru.practicum.analyzer.repository.ScenarioRepository;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -27,10 +32,6 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
     private final ScenarioRepository scenarioRepository;
     private final ActionRepository actionRepository;
     private final ConditionRepository conditionRepository;
-    private final SensorRepository sensorRepository;
-    private final ScenarioActionRepository scenarioActionRepository;
-    private final ScenarioConditionRepository scenarioConditionRepository;
-
 
     @Override
     @Transactional
@@ -40,16 +41,17 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
 
         Scenario scenario = scenarioMapper.toEntity(hubId, payload.getName());
 
+        Map<String, Condition> conditions = getConditions(payload.getConditions());
+        Map<String, Action> actions = getActions(payload.getActions());
+
+        scenario.setScenarioConditions(conditions);
+        scenario.setScenarioActions(actions);
+
+        actionRepository.saveAll(actions.values());
+        conditionRepository.saveAll(conditions.values());
+
         scenarioRepository.save(scenario);
-
-        log.debug("Saving {} actions for scenario", payload.getActions().size());
-        saveScenarioActions(payload, scenario);
-
-        log.debug("Saving {} conditions for scenario", payload.getConditions().size());
-        saveScenarioConditions(payload, scenario);
-
-        log.debug("Successfully processed scenario: {} with id: {}",
-                payload.getName(), scenario.getId());
+        log.debug("Scenario for hub: {} added successfully", hubId);
     }
 
     @Override
@@ -57,86 +59,27 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
         return ScenarioAddedEventAvro.class;
     }
 
-    private void saveScenarioActions(ScenarioAddedEventAvro payload, Scenario scenario) {
-        List<DeviceActionAvro> deviceActions = payload.getActions();
+    private Map<String, Condition> getConditions(List<ScenarioConditionAvro> conditionsAvro) {
+        if (conditionsAvro == null) {
+            return Map.of();
+        }
+        return conditionsAvro.stream()
+                .collect(Collectors.toMap(
+                        ScenarioConditionAvro::getSensorId,
+                        conditionMapper::toEntity
+                ));
+    }
 
-        if (deviceActions.isEmpty()) {
-            return;
+    private Map<String, Action> getActions(List<DeviceActionAvro> actionsAvro) {
+        if (actionsAvro == null) {
+            return Map.of();
         }
 
-        List<Action> savedActions = saveActions(deviceActions);
-
-        scenarioActionRepository.saveAll(
-                IntStream.range(0, deviceActions.size())
-                        .mapToObj(i ->
-                                createScenarioAction(scenario,
-                                        deviceActions.get(i),
-                                        savedActions.get(i)))
-                        .toList()
-        );
-    }
-
-    private void saveScenarioConditions(ScenarioAddedEventAvro payload, Scenario scenario) {
-        List<ScenarioConditionAvro> scenarioConditions = payload.getConditions();
-
-        if (scenarioConditions.isEmpty()) {
-            return;
-        }
-
-        List<Condition> savedConditions = saveConditions(scenarioConditions);
-
-        scenarioConditionRepository.saveAll(
-                IntStream.range(0, scenarioConditions.size())
-                        .mapToObj(i ->
-                                createScenarioCondition(scenario,
-                                        scenarioConditions.get(i),
-                                        savedConditions.get(i)))
-                        .toList()
-        );
-
-    }
-
-    private List<Action> saveActions(List<DeviceActionAvro> deviceActions) {
-        return actionRepository.saveAll(
-                deviceActions.stream()
-                        .map(actionMapper::toEntity)
-                        .toList()
-        );
-    }
-
-    private List<Condition> saveConditions(List<ScenarioConditionAvro> scenarioConditions) {
-        return conditionRepository.saveAll(
-                scenarioConditions.stream()
-                        .map(conditionMapper::toEntity)
-                        .toList()
-        );
-    }
-
-    private ScenarioAction createScenarioAction(Scenario scenario, DeviceActionAvro deviceAction, Action action) {
-        return ScenarioAction.builder()
-                .id(ScenarioActionId.builder()
-                        .scenarioId(scenario.getId())
-                        .sensorId(deviceAction.getSensorId())
-                        .actionId(action.getId())
-                        .build())
-                .scenario(scenario)
-                .sensor(sensorRepository.getReferenceById(deviceAction.getSensorId()))
-                .action(action)
-                .build();
-    }
-
-    private ScenarioCondition createScenarioCondition(Scenario scenario, ScenarioConditionAvro scenarioCondition,
-                                                      Condition condition) {
-        return ScenarioCondition.builder()
-                .id(ScenarioConditionId.builder()
-                        .scenarioId(scenario.getId())
-                        .sensorId(scenarioCondition.getSensorId())
-                        .conditionId(condition.getId())
-                        .build())
-                .scenario(scenario)
-                .sensor(sensorRepository.getReferenceById(scenarioCondition.getSensorId()))
-                .condition(condition)
-                .build();
+        return actionsAvro.stream()
+                .collect(Collectors.toMap(
+                        DeviceActionAvro::getSensorId,
+                        actionMapper::toEntity
+                ));
     }
 }
 
