@@ -19,7 +19,7 @@ public class DeviceAddedEventHandler extends BaseHubEventHandler<DeviceAddedEven
     @Override
     @Transactional
     protected void process(String hubId, DeviceAddedEventAvro payload) {
-        log.info("Processing device added event for hub: {}, deviceId: {}, deviceType: {}",
+        log.debug("Processing device added event for hub: {}, deviceId: {}, deviceType: {}",
                 hubId, payload.getId(), payload.getType());
 
         Sensor sensor = sensorMapper.toEntity(hubId, payload.getId());

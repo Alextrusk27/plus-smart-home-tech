@@ -23,7 +23,7 @@ public class ScenarioRemovedEventHandler extends BaseHubEventHandler<ScenarioRem
     @Override
     @Transactional
     protected void process(String hubId, ScenarioRemovedEventAvro payload) {
-        log.info("Processing scenario removed event for hub: {}, scenario: {}",
+        log.debug("Processing scenario removed event for hub: {}, scenario: {}",
                 hubId, payload.getName());
 
         String scenarioName = payload.getName();

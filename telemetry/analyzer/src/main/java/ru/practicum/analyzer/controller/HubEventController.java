@@ -24,15 +24,20 @@ public class HubEventController {
     }
 
     public void processRecord(HubEventAvro hubEvent) {
-        Object payload = hubEvent.getPayload();
-        Class<?> payloadClass = payload.getClass();
+        try {
+            Object payload = hubEvent.getPayload();
+            Class<?> payloadClass = payload.getClass();
 
-        HubEventHandler<?> handler = hubEventHandlers.get(payloadClass);
+            HubEventHandler<?> handler = hubEventHandlers.get(payloadClass);
 
-        if (handler == null) {
-            log.error("No handler found for event type: {}", payloadClass.getSimpleName());
-            throw new IllegalArgumentException("Unknown event type: " + payloadClass);
+            if (handler == null) {
+                log.error("No handler found for event type: {}", payloadClass.getSimpleName());
+                throw new IllegalArgumentException("Unknown event type: " + payloadClass);
+            }
+            handler.handle(hubEvent);
+            log.info("Hub event for HubId {} handled", hubEvent.getHubId());
+        } catch (Exception e) {
+            log.error("Error processing hub event", e);
         }
-        handler.handle(hubEvent);
     }
 }

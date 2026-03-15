@@ -21,7 +21,7 @@ public class DeviceRemovedEventHandler extends BaseHubEventHandler<DeviceRemoved
     protected void process(String hubId, DeviceRemovedEventAvro payload) {
         String deviceId = payload.getId();
 
-        log.info("Processing device removed event for hub: {}, deviceId: {}",
+        log.debug("Processing device removed event for hub: {}, deviceId: {}",
                 hubId, deviceId);
 
         Optional<Sensor> sensor = sensorRepository.findByIdAndHubId(deviceId, hubId);

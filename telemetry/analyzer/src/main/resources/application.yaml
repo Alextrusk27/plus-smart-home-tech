@@ -9,10 +9,15 @@ spring:
     username: ${DB_USER:analyzer}
     password: ${DB_PASSWORD:analyzer}
 
+logging:
+  level:
+    ru.practicum: DEBUG
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
+        ddl-auto: validate
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 kafka:

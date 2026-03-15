@@ -9,7 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.practicum.analyzer.configuration.KafkaProperties;
-import ru.practicum.analyzer.controller.SnapshotController;
+import ru.practicum.analyzer.service.snapshot.SnapshotService;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.time.Duration;
@@ -19,7 +19,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class SnapshotProcessor implements Runnable {
     private final Consumer<String, SensorsSnapshotAvro> snapshotConsumer;
-    private final SnapshotController snapshotController;
+    private final SnapshotService snapshotService;
     private final KafkaProperties kafkaProperties;
     private volatile boolean running = true;
 
@@ -33,7 +33,7 @@ public class SnapshotProcessor implements Runnable {
                 int recordsProcessed = 0;
 
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
-                    snapshotController.processRecord(record.value());
+                    snapshotService.handleSnapshot(record.value());
                     recordsProcessed++;
                 }
                 if (recordsProcessed > 0) {

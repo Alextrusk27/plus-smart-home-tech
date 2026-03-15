@@ -36,7 +36,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
     @Override
     @Transactional
     protected void process(String hubId, ScenarioAddedEventAvro payload) {
-        log.info("Processing scenario added event for hub: {}, scenario: {}",
+        log.debug("Processing scenario added event for hub: {}, scenario: {}",
                 hubId, payload.getName());
 
         Scenario scenario = scenarioMapper.toEntity(hubId, payload.getName());
