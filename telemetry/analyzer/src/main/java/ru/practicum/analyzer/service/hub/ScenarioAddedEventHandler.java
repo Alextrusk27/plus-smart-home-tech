@@ -19,6 +19,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,10 +40,14 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
         log.debug("Processing scenario added event for hub: {}, scenario: {}",
                 hubId, payload.getName());
 
-        Scenario scenario = scenarioMapper.toEntity(hubId, payload.getName());
+        Optional<Scenario> existingScenario = scenarioRepository.findByHubIdAndName(hubId, payload.getName());
+        Scenario scenario = existingScenario.orElseGet(() -> scenarioMapper.toEntity(hubId, payload.getName()));
 
         Map<String, Condition> conditions = getConditions(payload.getConditions());
         Map<String, Action> actions = getActions(payload.getActions());
+
+        scenario.getScenarioConditions().clear();
+        scenario.getScenarioActions().clear();
 
         scenario.setScenarioConditions(conditions);
         scenario.setScenarioActions(actions);

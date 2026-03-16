@@ -57,6 +57,7 @@ public class SnapshotService {
             }
         } catch (Exception e) {
             log.error("Snapshot handled with error ", e);
+            throw e;
         }
     }
 

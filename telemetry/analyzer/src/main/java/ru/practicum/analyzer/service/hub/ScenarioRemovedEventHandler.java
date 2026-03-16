@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.analyzer.model.Scenario;
-import ru.practicum.analyzer.repository.ActionRepository;
-import ru.practicum.analyzer.repository.ConditionRepository;
 import ru.practicum.analyzer.repository.ScenarioRepository;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 
@@ -17,8 +15,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ScenarioRemovedEventHandler extends BaseHubEventHandler<ScenarioRemovedEventAvro> {
     private final ScenarioRepository scenarioRepository;
-    private final ActionRepository actionRepository;
-    private final ConditionRepository conditionRepository;
 
     @Override
     @Transactional

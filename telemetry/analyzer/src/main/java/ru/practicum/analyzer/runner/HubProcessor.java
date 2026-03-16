@@ -30,15 +30,18 @@ public class HubProcessor implements Runnable {
                 ConsumerRecords<String, HubEventAvro> records = hubEventConsumer.poll(Duration.ofMillis(
                         kafkaProperties.getConsumers().get("hub").getPollTimeoutMs()));
 
-                int recordsProcessed = 0;
+                if (records.isEmpty()) {
+                    continue;
+                }
 
                 for (ConsumerRecord<String, HubEventAvro> record : records) {
-                    hubEventController.processRecord(record.value());
-                    recordsProcessed++;
+                    try {
+                        hubEventController.processRecord(record.value());
+                    } catch (Exception e) {
+                        log.error("Hub event handling failed", e);
+                    }
                 }
-                if (recordsProcessed > 0) {
-                    hubEventConsumer.commitAsync();
-                }
+                hubEventConsumer.commitAsync();
             }
         } catch (WakeupException ignored) {
             log.debug("HubProcessor received wakeup signal");
@@ -48,6 +51,7 @@ public class HubProcessor implements Runnable {
             try {
                 log.debug("Performing final commit before shutdown");
                 hubEventConsumer.commitSync();
+                hubEventConsumer.close();
             } catch (Exception e) {
                 log.error("Error during final commit", e);
             }
@@ -56,7 +60,7 @@ public class HubProcessor implements Runnable {
 
     @PreDestroy
     public void shutdown() {
-        log.debug("Shutting down HubProcessor");
+        log.debug("Shutting down HubEventProcessor");
         running = false;
         hubEventConsumer.wakeup();
     }

@@ -16,12 +16,12 @@ import java.util.Properties;
 public class AnalyzerConfig {
     private final KafkaProperties kafkaProperties;
 
-    @Bean(destroyMethod = "close")
+    @Bean
     public Consumer<String, HubEventAvro> hubEventConsumer() {
         return createConsumer("hub", HubEventAvro.class);
     }
 
-    @Bean(destroyMethod = "close")
+    @Bean
     public Consumer<String, SensorsSnapshotAvro> snapshotConsumer() {
         return createConsumer("snapshot", SensorsSnapshotAvro.class);
     }
@@ -36,11 +36,9 @@ public class AnalyzerConfig {
         }
 
         Properties props = getProperties(defaults, config);
-
         KafkaConsumer<String, T> consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(config.getTopics());
-        Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
 
         return consumer;
     }

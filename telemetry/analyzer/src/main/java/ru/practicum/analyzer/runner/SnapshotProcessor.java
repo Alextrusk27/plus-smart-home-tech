@@ -30,15 +30,18 @@ public class SnapshotProcessor implements Runnable {
                 ConsumerRecords<String, SensorsSnapshotAvro> records = snapshotConsumer.poll(Duration.ofMillis(
                         kafkaProperties.getConsumers().get("snapshot").getPollTimeoutMs()));
 
-                int recordsProcessed = 0;
+                if (records.isEmpty()) {
+                    continue;
+                }
 
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
-                    snapshotService.handleSnapshot(record.value());
-                    recordsProcessed++;
+                    try {
+                        snapshotService.handleSnapshot(record.value());
+                    } catch (Exception e) {
+                        log.error("Snapshot handling failed", e);
+                    }
                 }
-                if (recordsProcessed > 0) {
-                    snapshotConsumer.commitAsync();
-                }
+                snapshotConsumer.commitAsync();
             }
         } catch (WakeupException ignored) {
             log.debug("SnapshotProcessor received wakeup signal");
@@ -48,6 +51,7 @@ public class SnapshotProcessor implements Runnable {
             try {
                 log.debug("Performing final commit before shutdown");
                 snapshotConsumer.commitSync();
+                snapshotConsumer.close();
             } catch (Exception e) {
                 log.error("Error during final commit", e);
             }

@@ -38,6 +38,7 @@ public class HubEventController {
             log.info("Hub event for HubId {} handled", hubEvent.getHubId());
         } catch (Exception e) {
             log.error("Error processing hub event", e);
+            throw e;
         }
     }
 }

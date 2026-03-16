@@ -23,6 +23,12 @@ public class DeviceAddedEventHandler extends BaseHubEventHandler<DeviceAddedEven
                 hubId, payload.getId(), payload.getType());
 
         Sensor sensor = sensorMapper.toEntity(hubId, payload.getId());
+
+        if (sensorRepository.existsById(sensor.getId())) {
+            log.debug("Sensor with id {} already exists", sensor.getId());
+            return;
+        }
+
         sensorRepository.save(sensor);
 
         log.debug("Successfully added to hub: {} deviceId: {}, deviceType: {}",
