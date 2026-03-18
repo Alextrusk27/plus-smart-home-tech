@@ -1,56 +1,61 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.hub;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.DeviceActionProto;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioAddedEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioConditionProto;
 import ru.yandex.practicum.kafka.telemetry.event.*;
-import ru.yandex.practicum.telemetry.collector.dto.hub.HubEvent;
-import ru.yandex.practicum.telemetry.collector.dto.hub.HubEventType;
-import ru.yandex.practicum.telemetry.collector.dto.hub.ScenarioAddedEvent;
 import ru.yandex.practicum.telemetry.collector.service.CollectorKafkaProducer;
 
 import java.util.List;
 
+import static ru.yandex.practicum.grpc.telemetry.event.ScenarioConditionProto.ValueCase.BOOL_VALUE;
+
 @Component
-public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAddedEventAvro> {
+public class ScenarioAddedEventHandler extends BaseHubEventHandler {
     public ScenarioAddedEventHandler(CollectorKafkaProducer producer) {
         super(producer);
     }
 
     @Override
-    public ScenarioAddedEventAvro mapToAvro(HubEvent event) {
-        ScenarioAddedEvent scenarioAddedEvent = (ScenarioAddedEvent) event;
+    public HubEventAvro mapToAvro(HubEventProto event) {
+        ScenarioAddedEventProto payloadProto = event.getScenarioAdded();
 
-        List<ScenarioConditionAvro> conditions = scenarioAddedEvent.getConditions()
+        List<ScenarioConditionAvro> conditions = payloadProto.getConditionsList()
                 .stream()
                 .map(this::mapToCondition)
                 .toList();
 
-        List<DeviceActionAvro> actions = scenarioAddedEvent.getActions()
+        List<DeviceActionAvro> actions = payloadProto.getActionsList()
                 .stream()
                 .map(this::mapToAction)
                 .toList();
 
-        return ScenarioAddedEventAvro.newBuilder()
-                .setName(scenarioAddedEvent.getName())
-                .setConditions(conditions)
-                .setActions(actions)
+        return initBuilder(event)
+                .setPayload(ScenarioAddedEventAvro.newBuilder()
+                        .setName(payloadProto.getName())
+                        .setConditions(conditions)
+                        .setActions(actions)
+                        .build())
                 .build();
     }
 
     @Override
-    public HubEventType getMessageType() {
-        return HubEventType.SCENARIO_ADDED;
+    public HubEventProto.PayloadCase getMessageType() {
+        return HubEventProto.PayloadCase.SCENARIO_ADDED;
     }
 
-    private ScenarioConditionAvro mapToCondition(ScenarioAddedEvent.ScenarioCondition condition) {
+    private ScenarioConditionAvro mapToCondition(ScenarioConditionProto condition) {
         return ScenarioConditionAvro.newBuilder()
                 .setSensorId(condition.getSensorId())
                 .setType(ConditionTypeAvro.valueOf(condition.getType().name()))
                 .setOperation(ConditionOperationAvro.valueOf(condition.getOperation().name()))
-                .setValue(mapValue(condition.getValue()))
+                .setValue(mapValue(condition))
                 .build();
     }
 
-    private DeviceActionAvro mapToAction(ScenarioAddedEvent.DeviceAction action) {
+    private DeviceActionAvro mapToAction(DeviceActionProto action) {
         return DeviceActionAvro.newBuilder()
                 .setSensorId(action.getSensorId())
                 .setType(ActionTypeAvro.valueOf(action.getType().name()))
@@ -58,15 +63,11 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
                 .build();
     }
 
-    private Object mapValue(Object value) {
-        return switch (value) {
-            case null -> null;
-            case Integer i -> i;
-            case Boolean b -> b;
-            case String s -> throw new IllegalArgumentException(
-                    "String not allowed in Avro union (expected null, int, or boolean): " + s);
-            default -> throw new IllegalArgumentException(
-                    "Type not allowed: " + value.getClass().getSimpleName());
+    private Integer mapValue(ScenarioConditionProto condition) {
+        return switch (condition.getValueCase()) {
+            case INT_VALUE -> condition.getIntValue();
+            case BOOL_VALUE -> condition.getBoolValue() ? 1 : 0;
+            case VALUE_NOT_SET -> null;
         };
     }
 }

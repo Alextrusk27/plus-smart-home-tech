@@ -1,34 +1,63 @@
 package ru.yandex.practicum.telemetry.collector.service.handler.sensor;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.avro.specific.SpecificRecordBase;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.specific.SpecificDatumWriter;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-import ru.yandex.practicum.telemetry.collector.dto.sensor.SensorEvent;
 import ru.yandex.practicum.telemetry.collector.service.CollectorKafkaProducer;
 
-import static ru.yandex.practicum.telemetry.collector.utils.KafkaTopics.SENSORS_EVENTS;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Instant;
 
+import static ru.yandex.practicum.utils.KafkaTopics.SENSORS_EVENTS;
+
+@Slf4j
 @RequiredArgsConstructor
-public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
+public abstract class BaseSensorEventHandler implements SensorEventHandler {
     protected final CollectorKafkaProducer producer;
 
     @Override
-    public void handle(SensorEvent event) {
-        if (!event.getType().equals(getMessageType())) {
-            throw new IllegalArgumentException("Unknown event type: " + event.getType());
+    public void handle(SensorEventProto event) {
+        if (!event.getPayloadCase().equals(getMessageType())) {
+            throw new IllegalArgumentException("Unknown event type: " + event.getPayloadCase());
         }
 
-        T payload = mapToAvro(event);
+        SensorEventAvro eventAvro = mapToAvro(event);
 
-        SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
-                .setId(event.getId())
-                .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
-                .setPayload(payload)
-                .build();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(out, null);
+            DatumWriter<SensorEventAvro> writer = new SpecificDatumWriter<>(SensorEventAvro.class);
 
-        producer.send(SENSORS_EVENTS, event.getTimestamp(), event.getHubId(), eventAvro);
+            writer.write(eventAvro, encoder);
+            encoder.flush();
+
+            byte[] bytes = out.toByteArray();
+
+            producer.send(SENSORS_EVENTS,
+                    eventAvro.getTimestamp(),
+                    eventAvro.getHubId(),
+                    bytes);
+
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Avro serialization error: " + e);
+        }
     }
 
-    protected abstract T mapToAvro(SensorEvent event);
+    protected abstract SensorEventAvro mapToAvro(SensorEventProto event);
+
+    protected SensorEventAvro.Builder initBuilder(SensorEventProto event) {
+        return SensorEventAvro.newBuilder()
+                .setId(event.getId())
+                .setHubId(event.getHubId())
+                .setTimestamp(Instant.ofEpochSecond(
+                        event.getTimestamp().getSeconds(),
+                        event.getTimestamp().getNanos()
+                ));
+    }
 }

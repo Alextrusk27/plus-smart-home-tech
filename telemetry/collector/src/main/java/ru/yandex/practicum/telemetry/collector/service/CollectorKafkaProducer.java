@@ -2,21 +2,20 @@ package ru.yandex.practicum.telemetry.collector.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class CollectorKafkaProducer {
-    private final Producer<String, SpecificRecordBase> producer;
+    private final Producer<String, byte[]> producer;
 
-    public void send(String topic, Instant timestamp, String key, SpecificRecordBase message) {
-        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+    public void send(String topic, Instant timestamp, String key, byte[] message) {
+        ProducerRecord<String, byte[]> record = new ProducerRecord<>(
                 topic,
                 null,
                 timestamp.getEpochSecond(),
