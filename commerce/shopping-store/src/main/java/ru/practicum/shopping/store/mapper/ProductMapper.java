@@ -1,0 +1,21 @@
+package ru.practicum.shopping.store.mapper;
+
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import ru.practicum.interaction.api.dto.ProductDto;
+import ru.practicum.shopping.store.dto.CreateProductRequest;
+import ru.practicum.shopping.store.dto.UpdateProductRequest;
+import ru.practicum.shopping.store.model.Product;
+
+@Mapper(componentModel = "spring")
+public interface ProductMapper {
+
+    ProductDto toDto(Product product);
+
+    Product toEntity(CreateProductRequest request);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntity(@MappingTarget Product product, UpdateProductRequest request);
+}
