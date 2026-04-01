@@ -67,3 +67,20 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  shopping-cart-db:
+    image: postgres:16.1
+    container_name: shopping-cart-db
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./commerce/shopping-cart/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    environment:
+      POSTGRES_DB: shopping_cart_db
+      POSTGRES_USER: shopping_cart
+      POSTGRES_PASSWORD: shopping_cart
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
