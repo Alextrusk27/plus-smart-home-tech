@@ -1,4 +1,4 @@
-package ru.practicum.shopping.store.dto;
+package ru.practicum.interaction.api.dto.response;
 
 import org.springframework.data.domain.Sort;
 

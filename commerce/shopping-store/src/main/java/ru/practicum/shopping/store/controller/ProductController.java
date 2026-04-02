@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.interaction.api.ProductCategory;
 import ru.practicum.interaction.api.QuantityState;
 import ru.practicum.interaction.api.dto.response.ProductDto;
-import ru.practicum.shopping.store.dto.CreateProductRequest;
-import ru.practicum.shopping.store.dto.PageProductDto;
-import ru.practicum.shopping.store.dto.UpdateProductRequest;
+import ru.practicum.interaction.api.dto.request.CreateProductRequest;
+import ru.practicum.interaction.api.dto.response.PageProductDto;
+import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.shopping.store.service.ProductService;
 
 import java.net.URI;

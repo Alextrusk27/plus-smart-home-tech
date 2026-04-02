@@ -11,9 +11,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.interaction.api.dto.request.ChangeQuantity;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
-import ru.practicum.shopping.cart.dto.AddToCartRequest;
-import ru.practicum.shopping.cart.dto.ChangeQuantityRequest;
-import ru.practicum.shopping.cart.dto.RemoveFromCartRequest;
+import ru.practicum.interaction.api.dto.request.AddToCartRequest;
+import ru.practicum.interaction.api.dto.request.ChangeQuantityRequest;
+import ru.practicum.interaction.api.dto.request.RemoveFromCartRequest;
 import ru.practicum.shopping.cart.service.ShoppingCartService;
 
 import java.util.List;

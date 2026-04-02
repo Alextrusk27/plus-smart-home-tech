@@ -3,7 +3,7 @@ package ru.practicum.shopping.cart.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
-import ru.practicum.shopping.cart.dto.AddToCartRequest;
+import ru.practicum.interaction.api.dto.request.AddToCartRequest;
 import ru.practicum.shopping.cart.model.Cart;
 
 @Mapper(componentModel = "spring")

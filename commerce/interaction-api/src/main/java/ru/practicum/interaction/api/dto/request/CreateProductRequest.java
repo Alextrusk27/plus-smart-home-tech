@@ -1,4 +1,4 @@
-package ru.practicum.shopping.store.dto;
+package ru.practicum.interaction.api.dto.request;
 
 import jakarta.validation.constraints.*;
 import ru.practicum.interaction.api.ProductCategory;

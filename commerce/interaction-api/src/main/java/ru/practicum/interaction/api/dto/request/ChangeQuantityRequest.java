@@ -1,6 +1,4 @@
-package ru.practicum.shopping.cart.dto;
-
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+package ru.practicum.interaction.api.dto.request;
 
 import java.util.UUID;
 

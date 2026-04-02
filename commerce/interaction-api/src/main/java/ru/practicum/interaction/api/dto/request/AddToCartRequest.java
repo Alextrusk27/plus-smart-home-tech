@@ -1,4 +1,4 @@
-package ru.practicum.shopping.cart.dto;
+package ru.practicum.interaction.api.dto.request;
 
 import ru.practicum.interaction.api.exception.ProductCartException;
 
