@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.interaction.api.ProductCategory;
 import ru.practicum.interaction.api.ProductState;
 import ru.practicum.interaction.api.QuantityState;
-import ru.practicum.interaction.api.dto.ProductDto;
+import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.interaction.api.exception.ProductNotFoundException;
 import ru.practicum.shopping.store.dto.CreateProductRequest;
 import ru.practicum.shopping.store.dto.UpdateProductRequest;

@@ -84,3 +84,20 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  warehouse-db:
+    image: postgres:16.1
+    container_name: warehouse-db
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./commerce/warehouse/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    environment:
+      POSTGRES_DB: warehouse_db
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10

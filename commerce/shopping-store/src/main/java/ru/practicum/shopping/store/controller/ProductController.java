@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.interaction.api.ProductCategory;
 import ru.practicum.interaction.api.QuantityState;
-import ru.practicum.interaction.api.dto.ProductDto;
+import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.shopping.store.dto.CreateProductRequest;
 import ru.practicum.shopping.store.dto.PageProductDto;
 import ru.practicum.shopping.store.dto.UpdateProductRequest;

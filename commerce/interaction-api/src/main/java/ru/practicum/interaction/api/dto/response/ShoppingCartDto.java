@@ -1,4 +1,4 @@
-package ru.practicum.interaction.api.dto;
+package ru.practicum.interaction.api.dto.response;
 
 import java.util.Map;
 import java.util.UUID;

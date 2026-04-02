@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.interaction.api.ProductCategory;
 import ru.practicum.interaction.api.QuantityState;
-import ru.practicum.interaction.api.dto.ProductDto;
+import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.shopping.store.dto.CreateProductRequest;
 import ru.practicum.shopping.store.dto.UpdateProductRequest;
 

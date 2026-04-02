@@ -3,7 +3,7 @@ package ru.practicum.shopping.cart.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.interaction.api.dto.ShoppingCartDto;
+import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.interaction.api.exception.CartNotFoundException;
 import ru.practicum.interaction.api.exception.NoProductsInShoppingCartException;
 import ru.practicum.shopping.cart.dto.AddToCartRequest;

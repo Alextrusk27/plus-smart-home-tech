@@ -1,4 +1,4 @@
-package ru.practicum.interaction.api.dto;
+package ru.practicum.interaction.api.dto.response;
 
 import ru.practicum.interaction.api.ProductCategory;
 import ru.practicum.interaction.api.ProductState;

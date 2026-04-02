@@ -1,6 +1,6 @@
 package ru.practicum.shopping.cart.dto;
 
-import ru.practicum.interaction.api.exception.ProductCartException;
+import ru.practicum.interaction.api.dto.request.ChangeQuantity;
 
 import java.util.UUID;
 
@@ -11,21 +11,12 @@ public record ChangeQuantityRequest(
 ) {
     public static ChangeQuantityRequest of(
             String username,
-            ChangeQuantityBody body
+            ChangeQuantity changeQuantity
     ) {
         return new ChangeQuantityRequest(
                 username,
-                parseProductId(body.productId(), username),
-                body.newQuantity()
+                changeQuantity.productId(),
+                changeQuantity.newQuantity()
         );
-    }
-
-    private static UUID parseProductId(String productId, String username) {
-        try {
-            return UUID.fromString(productId);
-        } catch (IllegalArgumentException e) {
-            throw new ProductCartException("Change products quantity: Invalid product UUID: %s. Username: %s"
-                    .formatted(productId, username));
-        }
     }
 }

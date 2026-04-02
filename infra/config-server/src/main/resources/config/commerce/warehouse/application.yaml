@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: warehouse
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:native}
+
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5435/warehouse_db
+    username: ${DB_USER:warehouse}
+    password: ${DB_PASSWORD:warehouse}
+
+  jpa:
+    open-in-view: false
+
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations:
+            - classpath:config/commerce/{application}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
+
+server:
+  port: 0

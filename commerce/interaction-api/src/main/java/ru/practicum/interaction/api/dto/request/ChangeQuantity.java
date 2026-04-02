@@ -1,12 +1,14 @@
-package ru.practicum.shopping.cart.dto;
+package ru.practicum.interaction.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
-public record ChangeQuantityBody(
+import java.util.UUID;
+
+public record ChangeQuantity(
         @NotBlank
-        String productId,
+        UUID productId,
 
         @NotNull @PositiveOrZero
         Integer newQuantity

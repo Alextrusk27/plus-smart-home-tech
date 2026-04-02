@@ -9,9 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.interaction.api.dto.ShoppingCartDto;
+import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.shopping.cart.dto.AddToCartRequest;
-import ru.practicum.shopping.cart.dto.ChangeQuantityBody;
 import ru.practicum.shopping.cart.dto.ChangeQuantityRequest;
 import ru.practicum.shopping.cart.dto.RemoveFromCartRequest;
 import ru.practicum.shopping.cart.service.ShoppingCartService;
@@ -70,12 +70,13 @@ public class ShoppingCartController {
 
     @PostMapping("/change-quantity")
     public ResponseEntity<ShoppingCartDto> changeQuantity(@RequestParam @NotBlank String username,
-                                                          @RequestBody @Valid ChangeQuantityBody body) {
+                                                          @RequestBody @Valid ChangeQuantity changeQuantity) {
 
-        log.info("User '{}' changing product ID '{}'  quantity to '{}'", username, body.productId(), body.newQuantity());
-        ChangeQuantityRequest request = ChangeQuantityRequest.of(username, body);
+        log.info("User '{}' changing product ID '{}'  quantity to '{}'", username, changeQuantity.productId(),
+                changeQuantity.newQuantity());
+        ChangeQuantityRequest request = ChangeQuantityRequest.of(username, changeQuantity);
         var response = shoppingCartService.changeQuantity(request);
-        log.debug("User '{}' successfully changed quantity product ID '{}'", username, body.productId());
+        log.debug("User '{}' successfully changed quantity product ID '{}'", username, changeQuantity.productId());
         return ResponseEntity.ok(response);
     }
 }
