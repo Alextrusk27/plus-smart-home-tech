@@ -1,8 +1,8 @@
 package ru.practicum.interaction.api.dto.response;
 
-import ru.practicum.interaction.api.ProductCategory;
-import ru.practicum.interaction.api.ProductState;
-import ru.practicum.interaction.api.QuantityState;
+import ru.practicum.interaction.api.enums.ProductCategory;
+import ru.practicum.interaction.api.enums.ProductState;
+import ru.practicum.interaction.api.enums.QuantityState;
 
 import java.math.BigDecimal;
 import java.util.UUID;

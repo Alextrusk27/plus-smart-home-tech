@@ -1,4 +1,4 @@
-package ru.practicum.interaction.api;
+package ru.practicum.interaction.api.enums;
 
 public enum ProductState {
     ACTIVE,
