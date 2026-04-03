@@ -1,6 +1,6 @@
 package ru.practicum.warehouse.service;
 
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
@@ -12,7 +12,7 @@ public interface WarehouseService {
 
     BookedProductsDto checkProduct(ShoppingCartDto shoppingCart);
 
-    void addProduct(ChangeQuantity changeQuantity);
+    void addProduct(AddProductToWarehouseRequest request);
 
     AddressDto getAddress();
 }

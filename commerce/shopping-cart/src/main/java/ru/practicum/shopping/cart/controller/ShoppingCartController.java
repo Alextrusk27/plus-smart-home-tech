@@ -9,11 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
-import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.interaction.api.dto.request.AddToCartRequest;
+import ru.practicum.interaction.api.dto.request.ChangeQuantity;
 import ru.practicum.interaction.api.dto.request.ChangeQuantityRequest;
 import ru.practicum.interaction.api.dto.request.RemoveFromCartRequest;
+import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.shopping.cart.service.ShoppingCartService;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public class ShoppingCartController {
             @RequestParam @NotBlank String username,
             @RequestBody @NotNull @NotEmpty Map<String, Integer> products) {
 
-        log.info("User '{}' adding '{}' products to cart", username, products.size());
+        log.info("User '{}' adding '{}' products to cart", username, products);
         AddToCartRequest request = AddToCartRequest.of(username, products);
         var response = shoppingCartService.addToCart(request);
         log.debug("User '{}' successfully added products to cart", username);

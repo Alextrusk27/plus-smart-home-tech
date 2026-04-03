@@ -2,8 +2,7 @@ package ru.practicum.warehouse.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
@@ -22,13 +21,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class WarehouseServiceImpl implements WarehouseService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
     private static final String[] ADDRESSES =
-            new String[] {"ADDRESS_1", "ADDRESS_2"};
+            new String[]{"ADDRESS_1", "ADDRESS_2"};
     private static final String CURRENT_ADDRESS =
             ADDRESSES[Random.from(new SecureRandom()).nextInt(0, ADDRESSES.length)];
 
@@ -42,7 +40,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BookedProductsDto checkProduct(ShoppingCartDto shoppingCart) {
         Map<UUID, Integer> requested = shoppingCart.products();
         List<Product> products = productRepository.findAllById(requested.keySet());
@@ -74,11 +71,12 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public void addProduct(ChangeQuantity changeQuantity) {
-        Product product = productRepository.findById(changeQuantity.productId())
+    public void addProduct(AddProductToWarehouseRequest request) {
+        Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new ProductNotFoundException("Product %s not found"
-                        .formatted(changeQuantity.productId())));
-        product.setQuantity(changeQuantity.newQuantity());
+                        .formatted(request.productId())));
+        product.setQuantity(request.quantity());
+        productRepository.save(product);
     }
 
     @Override

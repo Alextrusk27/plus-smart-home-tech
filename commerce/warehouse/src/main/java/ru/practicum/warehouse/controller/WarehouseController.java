@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
@@ -39,12 +39,12 @@ public class WarehouseController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Void> addProduct(@RequestBody @Valid ChangeQuantity changeQuantity) {
+    public ResponseEntity<Void> addProduct(@RequestBody @Valid AddProductToWarehouseRequest request) {
 
-        log.info("Changing quantity for product '{}' to '{}'", changeQuantity.productId(),
-                changeQuantity.newQuantity());
-        warehouseService.addProduct(changeQuantity);
-        log.debug("Product '{}' quantity successfully changed", changeQuantity.productId());
+        log.info("Changing quantity for product '{}' to '{}'", request.productId(),
+                request.quantity());
+        warehouseService.addProduct(request);
+        log.debug("Product '{}' quantity successfully changed", request.productId());
         return ResponseEntity.ok().build();
     }
 

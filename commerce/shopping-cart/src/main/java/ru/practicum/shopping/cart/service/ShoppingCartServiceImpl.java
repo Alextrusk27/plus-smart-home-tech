@@ -1,30 +1,33 @@
 package ru.practicum.shopping.cart.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
-import ru.practicum.interaction.api.exception.CartNotFoundException;
-import ru.practicum.interaction.api.exception.NoProductsInShoppingCartException;
 import ru.practicum.interaction.api.dto.request.AddToCartRequest;
 import ru.practicum.interaction.api.dto.request.ChangeQuantityRequest;
 import ru.practicum.interaction.api.dto.request.RemoveFromCartRequest;
+import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
+import ru.practicum.interaction.api.exception.CartNotFoundException;
+import ru.practicum.interaction.api.exception.NoProductsInShoppingCartException;
+import ru.practicum.interaction.api.feign.WarehouseClient;
 import ru.practicum.shopping.cart.mapper.ShoppingCartMapper;
 import ru.practicum.shopping.cart.model.Cart;
 import ru.practicum.shopping.cart.repository.ShoppingCartRepository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Slf4j
 public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final ShoppingCartMapper shoppingCartMapper;
+    private final WarehouseClient warehouseClient;
 
     @Override
-    @Transactional(readOnly = true)
     public ShoppingCartDto getCart(String username) {
         return shoppingCartRepository.findByUsername(username)
                 .map(shoppingCartMapper::toDto)
@@ -34,11 +37,23 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public ShoppingCartDto addToCart(AddToCartRequest request) {
         Cart cart = shoppingCartRepository.findByUsername(request.username())
-                .orElseGet(() -> shoppingCartMapper.toEntity(request));
+                .orElseGet(() -> {
+                    Cart newCart = shoppingCartMapper.toEntity(request);
+                    newCart.setProducts(new HashMap<>());
+                    return newCart;
+                });
+
+        try {
+            warehouseClient.checkProduct(shoppingCartMapper.toDto(shoppingCartMapper.toEntity(request)));
+        } catch (FeignException e) {
+            throw new RuntimeException(e.toString());
+        }
 
         request.products().forEach((id, qty) ->
                 cart.getProducts().merge(id, qty, Integer::sum)
         );
+
+        shoppingCartRepository.save(cart);
         return shoppingCartMapper.toDto(cart);
     }
 
@@ -79,6 +94,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         cart.getProducts().put(request.productId(), request.newQuantity());
+        shoppingCartRepository.save(cart);
         return shoppingCartMapper.toDto(cart);
     }
 

@@ -4,9 +4,9 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
+import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.shopping.store.model.Product;
 
 @Mapper(componentModel = "spring")

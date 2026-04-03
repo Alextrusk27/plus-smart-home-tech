@@ -5,11 +5,11 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.util.UUID;
 
-public record ChangeQuantity(
+public record AddProductToWarehouseRequest(
         @NotNull
         UUID productId,
 
         @NotNull @PositiveOrZero
-        Integer newQuantity
+        Integer quantity
 ) {
 }
