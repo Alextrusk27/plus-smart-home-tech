@@ -1,8 +1,4 @@
 spring:
-  application:
-    name: analyzer
-  main:
-    web-application-type: none
   datasource:
     initialization-mode: always
     driver-class-name: org.postgresql.Driver
