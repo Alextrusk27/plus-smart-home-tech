@@ -6,6 +6,10 @@ spring:
     username: ${DB_USER:shopping_cart}
     password: ${DB_PASSWORD:shopping_cart}
 
+  sql:
+    init:
+      mode: always
+
   jpa:
     open-in-view: false
     properties:

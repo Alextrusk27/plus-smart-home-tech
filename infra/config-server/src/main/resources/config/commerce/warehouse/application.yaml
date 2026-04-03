@@ -6,5 +6,9 @@ spring:
     username: ${DB_USER:warehouse}
     password: ${DB_PASSWORD:warehouse}
 
+  sql:
+    init:
+      mode: always
+
   jpa:
     open-in-view: false

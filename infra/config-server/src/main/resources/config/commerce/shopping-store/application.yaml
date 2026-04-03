@@ -6,6 +6,10 @@ spring:
     username: ${DB_USER:shopping_store}
     password: ${DB_PASSWORD:shopping_store}
 
+  sql:
+    init:
+      mode: always
+
   jpa:
     open-in-view: false
 
