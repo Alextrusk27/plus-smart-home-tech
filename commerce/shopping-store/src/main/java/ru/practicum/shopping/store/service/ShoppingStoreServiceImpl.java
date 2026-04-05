@@ -21,7 +21,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService {
+public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 

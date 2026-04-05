@@ -10,7 +10,7 @@ import ru.practicum.interaction.api.dto.response.ProductDto;
 
 import java.util.UUID;
 
-public interface ProductService {
+public interface ShoppingStoreService {
 
     ProductDto getProduct(UUID productId);
 

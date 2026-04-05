@@ -12,7 +12,7 @@ import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.interaction.api.dto.response.PageProductDto;
 import ru.practicum.interaction.api.dto.response.ProductDto;
-import ru.practicum.shopping.store.service.ProductService;
+import ru.practicum.shopping.store.service.ShoppingStoreService;
 
 import java.net.URI;
 import java.util.UUID;
@@ -21,13 +21,13 @@ import java.util.UUID;
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
 @Slf4j
-public class ProductController {
-    private final ProductService productService;
+public class ShoppingStoreController {
+    private final ShoppingStoreService shoppingStoreService;
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable UUID productId) {
         log.info("Fetching product: {}", productId);
-        var productDto = productService.getProduct(productId);
+        var productDto = shoppingStoreService.getProduct(productId);
         log.debug("Product fetched successfully: id={}, name={}",
                 productDto.productId(), productDto.productName());
         return ResponseEntity.ok(productDto);
@@ -37,7 +37,7 @@ public class ProductController {
     public ResponseEntity<PageProductDto<ProductDto>> getProducts(@RequestParam ProductCategory category,
                                                                   Pageable pageable) {
         log.info("Fetching all products in category: {}", category);
-        var products = productService.getProducts(category, pageable);
+        var products = shoppingStoreService.getProducts(category, pageable);
         log.debug("Products fetched successfully");
         return ResponseEntity.ok(PageProductDto.from(products));
     }
@@ -45,7 +45,7 @@ public class ProductController {
     @PutMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody @Valid CreateProductRequest request) {
         log.info("Creating new product: {}", request.productName());
-        var productDto = productService.createProduct(request);
+        var productDto = shoppingStoreService.createProduct(request);
         log.debug("Product created successfully: id={}, name={}",
                 productDto.productId(), productDto.productName());
         URI location = URI.create("/api/v1/shopping-store/product/" + productDto.productId());
@@ -55,7 +55,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDto> updateProduct(@RequestBody @Valid UpdateProductRequest request) {
         log.info("Updating product: {}", request.productName());
-        var productDto = productService.updateProduct(request);
+        var productDto = shoppingStoreService.updateProduct(request);
         log.debug("Product updated successfully: id={}, name={}",
                 productDto.productId(), productDto.productName());
         return ResponseEntity.ok(productDto);
@@ -64,7 +64,7 @@ public class ProductController {
     @PostMapping("/removeProductFromStore")
     public ResponseEntity<Boolean> removeProductFromStore(@RequestBody UUID productId) {
         log.info("Deactivating product from store: {}", productId);
-        Boolean isRemoved = productService.removeProductFromStore(productId);
+        Boolean isRemoved = shoppingStoreService.removeProductFromStore(productId);
         log.debug("Product id={} deactivated successfully", productId);
         return ResponseEntity.ok(isRemoved);
     }
@@ -73,7 +73,7 @@ public class ProductController {
     public ResponseEntity<Boolean> updateQuantityState(@RequestParam UUID productId,
                                                        @RequestParam QuantityState quantityState) {
         log.info("Updating quantity state: {} in product id={}", quantityState, productId);
-        Boolean isUpdated = productService.updateQuantityState(productId, quantityState);
+        Boolean isUpdated = shoppingStoreService.updateQuantityState(productId, quantityState);
         log.debug("Product id={} updated successfully", productId);
         return ResponseEntity.ok(isUpdated);
     }
