@@ -10,6 +10,7 @@ import ru.practicum.interaction.api.dto.request.RemoveFromCartRequest;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.interaction.api.exception.CartNotFoundException;
 import ru.practicum.interaction.api.exception.NoProductsInShoppingCartException;
+import ru.practicum.interaction.api.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.practicum.interaction.api.feign.WarehouseClient;
 import ru.practicum.shopping.cart.mapper.ShoppingCartMapper;
 import ru.practicum.shopping.cart.model.Cart;
@@ -46,7 +47,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         try {
             warehouseClient.checkProduct(shoppingCartMapper.toDto(shoppingCartMapper.toEntity(request)));
         } catch (FeignException e) {
-            throw new RuntimeException(e.toString());
+            throw new ProductInShoppingCartLowQuantityInWarehouse(
+                    "Cannot add product to shopping cart, due to low quantity in warehouse: %s"
+                            .formatted(e.getMessage()));
         }
 
         request.products().forEach((id, qty) ->
@@ -80,6 +83,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         request.productsIds().forEach(id -> cart.getProducts().remove(id));
+        shoppingCartRepository.save(cart);
         return shoppingCartMapper.toDto(cart);
     }
 
