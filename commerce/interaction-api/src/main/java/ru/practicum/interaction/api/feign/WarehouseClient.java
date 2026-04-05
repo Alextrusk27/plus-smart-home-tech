@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.practicum.interaction.api.dto.request.ChangeQuantity;
+import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
@@ -22,7 +22,7 @@ public interface WarehouseClient {
     BookedProductsDto checkProduct(@RequestBody ShoppingCartDto shoppingCart) throws FeignException;
 
     @PostMapping("/add")
-    void addProduct(@RequestBody ChangeQuantity changeQuantity);
+    void addProduct(@RequestBody AddProductToWarehouseRequest request);
 
     @GetMapping("/address")
     AddressDto getAddress();
