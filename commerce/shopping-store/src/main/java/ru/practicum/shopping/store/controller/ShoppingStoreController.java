@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.interaction.api.api.ShoppingStoreApi;
 import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.interaction.api.dto.response.PageProductDto;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
 @Slf4j
-public class ShoppingStoreController {
+public class ShoppingStoreController implements ShoppingStoreApi {
     private final ShoppingStoreService shoppingStoreService;
 
     @GetMapping("/{productId}")
@@ -33,8 +34,7 @@ public class ShoppingStoreController {
     }
 
     @GetMapping
-    public PageProductDto<ProductDto> getProducts(@RequestParam ProductCategory category,
-                                                                  Pageable pageable) {
+    public PageProductDto<ProductDto> getProducts(@RequestParam ProductCategory category, Pageable pageable) {
         log.info("Fetching all products in category: {}", category);
         var products = shoppingStoreService.getProducts(category, pageable);
         log.debug("Products fetched successfully");
@@ -70,7 +70,7 @@ public class ShoppingStoreController {
 
     @PostMapping("/quantityState")
     public Boolean updateQuantityState(@RequestParam UUID productId,
-                                                       @RequestParam QuantityState quantityState) {
+                                       @RequestParam QuantityState quantityState) {
         log.info("Updating quantity state: {} in product id={}", quantityState, productId);
         Boolean isUpdated = shoppingStoreService.updateQuantityState(productId, quantityState);
         log.debug("Product id={} updated successfully", productId);

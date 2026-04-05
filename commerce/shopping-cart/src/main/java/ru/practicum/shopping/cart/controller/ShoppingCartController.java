@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.interaction.api.api.ShoppingCartApi;
 import ru.practicum.interaction.api.dto.request.AddToCartRequest;
 import ru.practicum.interaction.api.dto.request.ChangeQuantity;
 import ru.practicum.interaction.api.dto.request.ChangeQuantityRequest;
@@ -23,7 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Validated
 @Slf4j
-public class ShoppingCartController {
+public class ShoppingCartController implements ShoppingCartApi {
     private final ShoppingCartService shoppingCartService;
 
     @GetMapping
