@@ -13,6 +13,9 @@ public record RemoveFromCartRequest(
             String username,
             List<String> productsIds
     ) {
+        if (productsIds == null || productsIds.isEmpty()) {
+            throw new ProductCartException("ProductsIds is empty");
+        }
         return new RemoveFromCartRequest(
                 username,
                 productsIds.stream()

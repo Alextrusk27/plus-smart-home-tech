@@ -10,6 +10,7 @@ import ru.practicum.shopping.cart.model.Cart;
 public interface ShoppingCartMapper {
 
     @Mapping(target = "shoppingCartId", ignore = true)
+    @Mapping(target = "isActive", ignore = true)
     Cart toEntity(AddToCartRequest request);
 
     ShoppingCartDto toDto(Cart cart);

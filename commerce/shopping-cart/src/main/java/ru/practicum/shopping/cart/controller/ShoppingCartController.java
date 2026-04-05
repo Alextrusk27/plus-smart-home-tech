@@ -1,12 +1,8 @@
 package ru.practicum.shopping.cart.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.interaction.api.api.ShoppingCartApi;
 import ru.practicum.interaction.api.dto.request.AddToCartRequest;
@@ -22,13 +18,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/shopping-cart")
 @RequiredArgsConstructor
-@Validated
 @Slf4j
 public class ShoppingCartController implements ShoppingCartApi {
     private final ShoppingCartService shoppingCartService;
 
     @GetMapping
-    public ShoppingCartDto getCart(@RequestParam @NotBlank String username) {
+    public ShoppingCartDto getCart(@RequestParam String username) {
 
         log.info("Fetching cart for user {}", username);
         var result = shoppingCartService.getCart(username);
@@ -37,9 +32,8 @@ public class ShoppingCartController implements ShoppingCartApi {
     }
 
     @PutMapping
-    public ShoppingCartDto addToCart(
-            @RequestParam @NotBlank String username,
-            @RequestBody @NotNull @NotEmpty Map<String, Integer> products) {
+    public ShoppingCartDto addToCart(@RequestParam String username,
+                                     @RequestBody Map<String, Integer> products) {
 
         log.info("User '{}' adding '{}' products to cart", username, products);
         var result = shoppingCartService.addToCart(AddToCartRequest.of(username, products));
@@ -48,16 +42,16 @@ public class ShoppingCartController implements ShoppingCartApi {
     }
 
     @DeleteMapping
-    public void removeCart(@RequestParam @NotBlank String username) {
+    public void deactivateCart(@RequestParam String username) {
 
         log.info("User '{}' removing cart", username);
-        shoppingCartService.removeCart(username);
+        shoppingCartService.deactivateCart(username);
         log.debug("User '{}' successfully removed cart", username);
     }
 
     @PostMapping("/remove")
-    public ShoppingCartDto removeFromCart(@RequestParam @NotBlank String username,
-                                          @RequestBody @NotNull @NotEmpty List<String> productsIds) {
+    public ShoppingCartDto removeFromCart(@RequestParam String username,
+                                          @RequestBody List<String> productsIds) {
 
         log.info("User '{}' removing '{}' products from cart", username, productsIds.size());
         RemoveFromCartRequest request = RemoveFromCartRequest.of(username, productsIds);
@@ -67,7 +61,7 @@ public class ShoppingCartController implements ShoppingCartApi {
     }
 
     @PostMapping("/change-quantity")
-    public ShoppingCartDto changeQuantity(@RequestParam @NotBlank String username,
+    public ShoppingCartDto changeQuantity(@RequestParam String username,
                                           @RequestBody @Valid ChangeQuantity changeQuantity) {
 
         log.info("User '{}' changing product ID '{}'  quantity to '{}'", username, changeQuantity.productId(),

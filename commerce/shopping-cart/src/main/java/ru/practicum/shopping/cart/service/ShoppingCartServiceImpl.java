@@ -30,14 +30,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getCart(String username) {
-        return shoppingCartRepository.findByUsername(username)
+        return shoppingCartRepository.findByUsernameAndIsActiveTrue(username)
                 .map(shoppingCartMapper::toDto)
                 .orElseThrow(() -> noCartByUser(username));
     }
 
     @Override
     public ShoppingCartDto addToCart(AddToCartRequest request) {
-        Cart cart = shoppingCartRepository.findByUsername(request.username())
+        Cart cart = shoppingCartRepository.findByUsernameAndIsActiveTrue(request.username())
                 .orElseGet(() -> {
                     Cart newCart = shoppingCartMapper.toEntity(request);
                     newCart.setProducts(new HashMap<>());
@@ -61,16 +61,16 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public void removeCart(String username) {
-        shoppingCartRepository.delete(
-                shoppingCartRepository.findByUsername(username)
-                        .orElseThrow(() -> noCartByUser(username))
-        );
+    public void deactivateCart(String username) {
+        Cart cart = shoppingCartRepository.findByUsernameAndIsActiveTrue(username)
+                .orElseThrow(() -> noCartByUser(username));
+        cart.setIsActive(false);
+        shoppingCartRepository.save(cart);
     }
 
     @Override
     public ShoppingCartDto removeFromCart(RemoveFromCartRequest request) {
-        Cart cart = shoppingCartRepository.findByUsername(request.username())
+        Cart cart = shoppingCartRepository.findByUsernameAndIsActiveTrue(request.username())
                 .orElseThrow(() -> noCartByUser(request.username()));
 
         List<UUID> notFound = request.productsIds().stream()
@@ -89,7 +89,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto changeQuantity(ChangeQuantityRequest request) {
-        Cart cart = shoppingCartRepository.findByUsername(request.username())
+        Cart cart = shoppingCartRepository.findByUsernameAndIsActiveTrue(request.username())
                 .orElseThrow(() -> noCartByUser(request.username()));
 
         if (!cart.getProducts().containsKey(request.productId())) {

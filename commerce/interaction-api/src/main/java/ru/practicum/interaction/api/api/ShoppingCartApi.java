@@ -11,7 +11,7 @@ public interface ShoppingCartApi {
 
     ShoppingCartDto addToCart(String username, Map<String, Integer> products);
 
-    void removeCart(String username);
+    void deactivateCart(String username);
 
     ShoppingCartDto removeFromCart(String username, List<String> productsIds);
 

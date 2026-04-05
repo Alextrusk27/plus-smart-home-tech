@@ -18,8 +18,10 @@ public class Cart {
     @Id
     private UUID shoppingCartId;
 
-    @Column(name = "username", nullable = false)
     private String username;
+
+    @Builder.Default
+    private Boolean isActive = true;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(

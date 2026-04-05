@@ -14,6 +14,9 @@ public record AddToCartRequest(
             String username,
             Map<String, Integer> products
     ) {
+        if (products == null || products.isEmpty()) {
+            throw new ProductCartException("Products cannot be null or empty");
+        }
         return new AddToCartRequest(
                 username,
                 products.entrySet().stream()

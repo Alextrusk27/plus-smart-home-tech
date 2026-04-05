@@ -11,7 +11,7 @@ public interface ShoppingCartService {
 
     ShoppingCartDto addToCart(AddToCartRequest request);
 
-    void removeCart(String username);
+    void deactivateCart(String username);
 
     ShoppingCartDto removeFromCart(RemoveFromCartRequest request);
 
