@@ -32,7 +32,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public ShoppingCartDto getCart(String username) {
         return shoppingCartRepository.findByUsernameAndIsActiveTrue(username)
                 .map(shoppingCartMapper::toDto)
-                .orElseThrow(() -> noCartByUser(username));
+                .orElseGet(() -> {
+                    Cart cart = Cart.builder()
+                            .username(username)
+                            .build();
+                    return shoppingCartMapper.toDto(shoppingCartRepository.save(cart));
+                });
     }
 
     @Override
