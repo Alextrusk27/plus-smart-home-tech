@@ -33,6 +33,7 @@
         <grpc.version>1.63.0</grpc.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <postgres.version>42.7.8</postgres.version>
+        <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 
         <!--       Plugins       -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -109,6 +110,14 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgres.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

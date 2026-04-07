@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/analyzer_db
+    username: ${DB_USER:analyzer}
+    password: ${DB_PASSWORD:analyzer}
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        ddl-auto: validate
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  default-config:
+    group-id: ${KAFKA_GROUP_ID:analyzer-group}
+    enable-auto-commit: false
+    auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+    key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+
+  consumers:
+    hub:
+      topics:
+        - ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+      poll-timeout-ms: 200
+      max-poll-records: 100
+      value-deserializer: "ru.yandex.practicum.serialization.avro.HubEventDeserializer"
+
+    snapshot:
+      topics:
+        - ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
+      poll-timeout-ms: 400
+      max-poll-records: 50
+      value-deserializer: "ru.yandex.practicum.serialization.avro.SensorsSnapshotDeserializer"
+
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext

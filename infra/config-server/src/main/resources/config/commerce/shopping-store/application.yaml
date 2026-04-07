@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/shopping_store_db
+    username: ${DB_USER:shopping_store}
+    password: ${DB_PASSWORD:shopping_store}
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    open-in-view: false
+
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        page-parameter: page
+        size-parameter: size
+        sort-parameter: sort

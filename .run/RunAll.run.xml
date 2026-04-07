@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RunAll" type="CompoundRunConfigurationType">
+    <toRun name="Aggregator" type="Application" />
+    <toRun name="Analyzer" type="Application" />
+    <toRun name="Collector" type="Application" />
+    <toRun name="ConfigServer" type="Application" />
+    <toRun name="DiscoveryServer" type="Application" />
+    <toRun name="ShoppingCart" type="Application" />
+    <toRun name="ShoppingStore" type="Application" />
+    <toRun name="Warehouse" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

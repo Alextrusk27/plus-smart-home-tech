@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RunTelemetry" type="CompoundRunConfigurationType">
+    <toRun name="Aggregator" type="Application" />
+    <toRun name="Analyzer" type="Application" />
+    <toRun name="Collector" type="Application" />
+    <toRun name="ConfigServer" type="Application" />
+    <toRun name="DiscoveryServer" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

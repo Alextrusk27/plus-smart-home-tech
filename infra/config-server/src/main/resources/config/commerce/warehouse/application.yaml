@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5435/warehouse_db
+    username: ${DB_USER:warehouse}
+    password: ${DB_PASSWORD:warehouse}
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    open-in-view: false
