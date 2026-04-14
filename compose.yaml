@@ -135,3 +135,20 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  payment-db:
+    image: postgres:16.1
+    container_name: payment-db
+    ports:
+      - "5438:5432"
+    volumes:
+      - ./commerce/payment/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
