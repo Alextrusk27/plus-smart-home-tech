@@ -101,3 +101,20 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  delivery-db:
+    image: postgres:16.1
+    container_name: delivery-db
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./commerce/delivery/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    environment:
+      POSTGRES_DB: delivery_db
+      POSTGRES_USER: delivery
+      POSTGRES_PASSWORD: delivery
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
