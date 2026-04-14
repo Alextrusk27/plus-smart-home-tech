@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5437/order_db
+    username: ${DB_USER:order}
+    password: ${DB_PASSWORD:order}
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        ddl-auto: validate

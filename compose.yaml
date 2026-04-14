@@ -118,3 +118,20 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+
+  order-db:
+    image: postgres:16.1
+    container_name: order-db
+    ports:
+      - "5437:5432"
+    volumes:
+      - ./commerce/order/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
