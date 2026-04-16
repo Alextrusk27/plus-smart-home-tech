@@ -13,7 +13,8 @@ public class ExceptionController {
     @ExceptionHandler({
             CartNotFoundException.class,
             NoProductsInShoppingCartException.class,
-            ProductNotFoundException.class
+            ProductNotFoundException.class,
+            NoOrderFoundException.class,
     })
     public ResponseEntity<ApiError> handleException(RuntimeException e) {
         HttpStatus status = HttpStatus.NOT_FOUND;
@@ -37,6 +38,14 @@ public class ExceptionController {
     public ResponseEntity<ApiError> handleProductCartException(ProductCartException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         log.error("Invalid cart request: {}", e.getMessage());
+        return ResponseEntity.status(status)
+                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+    }
+
+    @ExceptionHandler(ProductCartException.class)
+    public ResponseEntity<ApiError> handleUnauthorizedException(NotAuthorizedUserException e) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        log.error("Authorization error: {}", e.getMessage());
         return ResponseEntity.status(status)
                 .body(ApiError.of(status.name(), e.getMessage(), status.value()));
     }
