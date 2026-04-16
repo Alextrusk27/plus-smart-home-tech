@@ -11,6 +11,7 @@ import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.interaction.api.enums.ProductCategory;
 import ru.practicum.interaction.api.enums.QuantityState;
 
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
@@ -19,6 +20,10 @@ public interface ShoppingStoreClient extends ShoppingStoreApi {
     @Override
     @GetMapping("/{productId}")
     ProductDto getProduct(@PathVariable UUID productId);
+
+    @Override
+    @GetMapping("/batch")
+    List<ProductDto> getProductsByIds(@RequestParam List<UUID> productIds);
 
     @Override
     @GetMapping

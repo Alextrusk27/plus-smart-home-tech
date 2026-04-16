@@ -8,11 +8,14 @@ import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.interaction.api.dto.response.ProductDto;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShoppingStoreService {
 
     ProductDto getProduct(UUID productId);
+
+    List<ProductDto> getProductsByIds(List<UUID> productIds);
 
     Page<ProductDto> getProducts(ProductCategory category, Pageable pageable);
 
