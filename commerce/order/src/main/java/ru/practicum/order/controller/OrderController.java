@@ -42,7 +42,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/payment")
-    public OrderDto initPayment(UUID orderId) {
+    public OrderDto initPayment(@RequestBody UUID orderId) {
         log.info("Request to init payment for order: {}", orderId);
         var result = orderService.initPayment(orderId);
         log.debug("Payment for order {} initialized", orderId);
@@ -51,7 +51,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/payment/success")
-    public OrderDto paymentSuccess(UUID orderId) {
+    public OrderDto paymentSuccess(@RequestBody UUID orderId) {
         log.info("Processing payment success for order: {}", orderId);
         var result = orderService.paymentSuccess(orderId);
         writeStatusLog(orderId, result.state());
@@ -60,7 +60,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/payment/failed")
-    public OrderDto paymentFailed(UUID orderId) {
+    public OrderDto paymentFailed(@RequestBody UUID orderId) {
         log.info("Processing payment fail for order: {}", orderId);
         var result = orderService.paymentFailed(orderId);
         writeStatusLog(orderId, result.state());
@@ -69,7 +69,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/assembly")
-    public OrderDto initAssembly(UUID orderId) {
+    public OrderDto initAssembly(@RequestBody UUID orderId) {
         log.info("Request to init assembly for order: {}", orderId);
         var result = orderService.initAssembly(orderId);
         writeStatusLog(orderId, result.state());
@@ -78,7 +78,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/assembly/success")
-    public OrderDto assembled(UUID orderId) {
+    public OrderDto assembled(@RequestBody UUID orderId) {
         log.info("Processing order assembled for order: {}", orderId);
         var result = orderService.orderAssembled(orderId);
         writeStatusLog(orderId, result.state());
@@ -87,7 +87,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/assembly/failed")
-    public OrderDto assemblyFailed(UUID orderId) {
+    public OrderDto assemblyFailed(@RequestBody UUID orderId) {
         log.info("Processing order assembly failed for order: {}", orderId);
         var result = orderService.orderAssemblyFailed(orderId);
         writeStatusLog(orderId, result.state());
@@ -96,7 +96,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/delivery")
-    public OrderDto initDelivery(UUID orderId) {
+    public OrderDto initDelivery(@RequestBody UUID orderId) {
         log.info("Request to init delivery for order: {}", orderId);
         var result = orderService.initDelivery(orderId);
         writeStatusLog(orderId, result.state());
@@ -105,7 +105,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/delivery/success")
-    public OrderDto delivered(UUID orderId) {
+    public OrderDto delivered(@RequestBody UUID orderId) {
         log.info("Processing order delivered for order: {}", orderId);
         var result = orderService.orderDelivered(orderId);
         writeStatusLog(orderId, result.state());
@@ -114,7 +114,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/delivery/failed")
-    public OrderDto deliveryFailed(UUID orderId) {
+    public OrderDto deliveryFailed(@RequestBody UUID orderId) {
         log.info("Processing order delivery failed for order: {}", orderId);
         var result = orderService.orderDeliveryFailed(orderId);
         writeStatusLog(orderId, result.state());
@@ -122,7 +122,8 @@ public class OrderController implements OrderApi {
     }
 
     @Override
-    public OrderDto completed(UUID orderId) {
+    @PostMapping("/completed")
+    public OrderDto completed(@RequestBody UUID orderId) {
         log.info("Processing order: {} completed", orderId);
         var result = orderService.completed(orderId);
         writeStatusLog(orderId, result.state());
@@ -130,7 +131,8 @@ public class OrderController implements OrderApi {
     }
 
     @Override
-    public OrderDto canceled(UUID orderId) {
+    @PostMapping("/canceled")
+    public OrderDto canceled(@RequestBody UUID orderId) {
         log.info("Processing order: {} canceled", orderId);
         var result = orderService.canceled(orderId);
         writeStatusLog(orderId, result.state());
@@ -139,7 +141,7 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/return")
-    public OrderDto returnProducts(ProductReturnRequest request) {
+    public OrderDto returnProducts(@RequestBody ProductReturnRequest request) {
         log.info("Request to returning order: {}", request.orderId());
         var result = orderService.returnProducts(request);
         log.debug("Order {} successfully returned", request.orderId());
@@ -147,7 +149,8 @@ public class OrderController implements OrderApi {
     }
 
     @Override
-    public OrderDto calculateTotal(UUID orderId) {
+    @PostMapping("/calculate/total")
+    public OrderDto calculateTotal(@RequestBody UUID orderId) {
         log.info("Calculating total price for order: {}", orderId);
         var result = orderService.calculateTotal(orderId);
         log.debug("Total price for order {} is {}", orderId, result.totalPrice());
