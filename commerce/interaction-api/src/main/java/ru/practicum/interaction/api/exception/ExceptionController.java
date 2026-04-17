@@ -49,4 +49,12 @@ public class ExceptionController {
         return ResponseEntity.status(status)
                 .body(ApiError.of(status.name(), e.getMessage(), status.value()));
     }
+
+    @ExceptionHandler(NotEnoughInfoInOrderToCalculateException.class)
+    public ResponseEntity<ApiError> handleNotEnoughInfoException(NotEnoughInfoInOrderToCalculateException e) {
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        log.error("Not enough info: {}", e.getMessage());
+        return ResponseEntity.status(status)
+                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+    }
 }
