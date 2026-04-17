@@ -15,6 +15,7 @@ public class ExceptionController {
             NoProductsInShoppingCartException.class,
             ProductNotFoundException.class,
             NoOrderFoundException.class,
+            NoDeliveryFoundException.class,
     })
     public ResponseEntity<ApiError> handleException(RuntimeException e) {
         HttpStatus status = HttpStatus.NOT_FOUND;
