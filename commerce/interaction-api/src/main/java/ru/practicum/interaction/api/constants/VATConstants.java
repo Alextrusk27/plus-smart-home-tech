@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 
 @UtilityClass
 public class VATConstants {
-    public final BigDecimal VAT = BigDecimal.valueOf(0.1);
-    public final BigDecimal VAT_MULTIPLIER = BigDecimal.ONE.add(VAT);
+    public static final BigDecimal VAT = BigDecimal.valueOf(0.1);
+    public static final BigDecimal VAT_MULTIPLIER = BigDecimal.ONE.add(VAT);
 }
