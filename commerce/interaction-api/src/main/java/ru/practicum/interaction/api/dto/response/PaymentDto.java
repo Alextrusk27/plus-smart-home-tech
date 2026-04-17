@@ -3,7 +3,7 @@ package ru.practicum.interaction.api.dto.response;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static ru.practicum.interaction.api.constants.VATConstants.VAT;
+import static ru.practicum.interaction.api.constants.BaseRateConstants.VAT;
 
 public record PaymentDto(
         UUID paymentId,

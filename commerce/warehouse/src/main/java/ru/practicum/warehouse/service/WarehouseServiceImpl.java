@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ru.practicum.interaction.api.constants.WarehouseAddress.CURRENT_ADDRESS;
+import static ru.practicum.interaction.api.constants.WarehouseConstants.CURRENT_ADDRESS;
 
 @Service
 @RequiredArgsConstructor

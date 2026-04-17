@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.practicum.interaction.api.constants.VATConstants.VAT_MULTIPLIER;
+import static ru.practicum.interaction.api.constants.BaseRateConstants.VAT_MULTIPLIER;
 
 @Service
 @RequiredArgsConstructor

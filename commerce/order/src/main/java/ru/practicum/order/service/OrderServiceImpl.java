@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.interaction.api.dto.request.AddressRequest;
 import ru.practicum.interaction.api.dto.request.CreateNewOrderRequest;
+import ru.practicum.interaction.api.dto.request.DeliveryRequest;
 import ru.practicum.interaction.api.dto.request.ProductReturnRequest;
+import ru.practicum.interaction.api.dto.response.BookedProductsDto;
 import ru.practicum.interaction.api.dto.response.OrderDto;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.interaction.api.enums.OrderState;
 import ru.practicum.interaction.api.exception.CartNotFoundException;
 import ru.practicum.interaction.api.exception.NoOrderFoundException;
 import ru.practicum.interaction.api.exception.NotAuthorizedUserException;
+import ru.practicum.interaction.api.feign.DeliveryClient;
 import ru.practicum.interaction.api.feign.PaymentClient;
 import ru.practicum.interaction.api.feign.ShoppingCartClient;
 import ru.practicum.interaction.api.feign.WarehouseClient;
@@ -33,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final ShoppingCartClient shoppingCartClient;
     private final WarehouseClient warehouseClient;
     private final PaymentClient paymentClient;
+    private final DeliveryClient deliveryClient;
 
     @Override
     public Page<OrderDto> getOrders(String username, Pageable pageable) {
@@ -56,8 +61,6 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto createOrder(String username, CreateNewOrderRequest request) {
         ShoppingCartDto shoppingCart = shoppingCartClient.getCart(username);
 
-        log.warn("CART: {}", shoppingCart);
-
         if (!shoppingCart.equals(request.shoppingCart())) {
             throw new CartNotFoundException("Shopping cart not found");
         }
@@ -65,17 +68,26 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderMapper.toEntity(request);
         order.setUsername(username);
 
+        BookedProductsDto bookedProducts = warehouseClient.checkProduct(shoppingCart);
         // есть ли заказываемые товары на складе?
 
-        order.setDeliveryWeight(BigDecimal.valueOf(5));
-        order.setDeliveryVolume(BigDecimal.valueOf(5));
+        order.setDeliveryWeight(bookedProducts.deliveryWeight());
+        order.setDeliveryVolume(bookedProducts.deliveryVolume());
+        order.setFragile(bookedProducts.fragile());
+
         order.setDeliveryPrice(BigDecimal.valueOf(5));
-        order.setFragile(false);
+
 
         order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
         order.setTotalPrice(paymentClient.totalCost(orderMapper.toDto(order)));
 
         orderRepository.save(order);
+
+        deliveryClient.planDelivery(DeliveryRequest.of(
+                AddressRequest.of(request.deliveryAddress()),
+                AddressRequest.of(request.deliveryAddress()),
+                orderMapper.toDto(order)
+        ));
 
         shoppingCartClient.deactivateCart(username);
 
@@ -85,9 +97,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto initPayment(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
-
-        // запуск процесса оплаты в payment
-
+        paymentClient.payment(orderMapper.toDto(order));
         return updateOrderState(order, OrderState.ON_PAYMENT);
     }
 
@@ -127,9 +137,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto initDelivery(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
-
-        // запуск процесса доставки в delivery
-
         return updateOrderState(order, OrderState.ON_DELIVERY);
     }
 
