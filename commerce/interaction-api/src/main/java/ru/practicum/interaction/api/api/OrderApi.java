@@ -12,6 +12,8 @@ public interface OrderApi {
 
     Page<OrderDto> getOrders(String username, Pageable pageable);
 
+    UUID getOrderIdByPaymentId(UUID paymentId);
+
     OrderDto createOrder(String username, CreateNewOrderRequest request);
 
     OrderDto initPayment(UUID orderId);

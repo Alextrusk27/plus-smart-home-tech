@@ -32,6 +32,15 @@ public class OrderController implements OrderApi {
     }
 
     @Override
+    @GetMapping("/by/payment")
+    public UUID getOrderIdByPaymentId(@RequestParam UUID paymentId) {
+        log.info("Fetching order by payment: {}", paymentId);
+        UUID result = orderService.getOrderIdByPayment(paymentId);
+        log.debug("Order id {} by payment id {} fetched successfully", result, paymentId);
+        return result;
+    }
+
+    @Override
     @PutMapping
     public OrderDto createOrder(@RequestParam String username, @RequestBody @Valid CreateNewOrderRequest request) {
         log.info("Request from user {} to create order: {}", username, request);

@@ -13,6 +13,7 @@ import ru.practicum.interaction.api.enums.OrderState;
 import ru.practicum.interaction.api.exception.CartNotFoundException;
 import ru.practicum.interaction.api.exception.NoOrderFoundException;
 import ru.practicum.interaction.api.exception.NotAuthorizedUserException;
+import ru.practicum.interaction.api.feign.PaymentClient;
 import ru.practicum.interaction.api.feign.ShoppingCartClient;
 import ru.practicum.interaction.api.feign.WarehouseClient;
 import ru.practicum.order.model.Order;
@@ -31,12 +32,24 @@ public class OrderServiceImpl implements OrderService {
 
     private final ShoppingCartClient shoppingCartClient;
     private final WarehouseClient warehouseClient;
+    private final PaymentClient paymentClient;
 
     @Override
     public Page<OrderDto> getOrders(String username, Pageable pageable) {
         checkUsername(username);
         return orderRepository.findAllByUsername(username, pageable)
                 .map(orderMapper::toDto);
+    }
+
+    @Override
+    public UUID getOrderIdByPayment(UUID paymentId) {
+        if (paymentId == null) {
+            throw new NoOrderFoundException("Payment id is null");
+        }
+
+        return orderRepository.findOrderIdByPaymentId(paymentId)
+                .orElseThrow(() -> new NoOrderFoundException("Order with payment id '%s' not found"
+                        .formatted(paymentId)));
     }
 
     @Override
@@ -58,8 +71,9 @@ public class OrderServiceImpl implements OrderService {
         order.setDeliveryVolume(BigDecimal.valueOf(5));
         order.setDeliveryPrice(BigDecimal.valueOf(5));
         order.setFragile(false);
-        order.setTotalPrice(BigDecimal.valueOf(5));
-        order.setProductPrice(BigDecimal.valueOf(5));
+
+        order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
+        order.setTotalPrice(paymentClient.totalCost(orderMapper.toDto(order)));
 
         orderRepository.save(order);
 

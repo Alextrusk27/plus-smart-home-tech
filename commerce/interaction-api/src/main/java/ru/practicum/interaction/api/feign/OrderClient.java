@@ -19,6 +19,10 @@ public interface OrderClient extends OrderApi {
     Page<OrderDto> getOrders(@RequestParam String username, Pageable pageable);
 
     @Override
+    @GetMapping("/by/payment")
+    UUID getOrderIdByPaymentId(@RequestParam UUID paymentId);
+
+    @Override
     @PutMapping
     OrderDto createOrder(@RequestParam String username, @RequestBody CreateNewOrderRequest request);
 
