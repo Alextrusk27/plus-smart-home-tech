@@ -15,20 +15,19 @@ import ru.practicum.warehouse.model.Product;
 import ru.practicum.warehouse.repository.ProductRepository;
 
 import java.math.BigDecimal;
-import java.security.SecureRandom;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static ru.practicum.interaction.api.constants.WarehouseAddress.CURRENT_ADDRESS;
 
 @Service
 @RequiredArgsConstructor
 public class WarehouseServiceImpl implements WarehouseService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-
-    private static final String[] ADDRESSES =
-            new String[]{"ADDRESS_1", "ADDRESS_2"};
-    private static final String CURRENT_ADDRESS =
-            ADDRESSES[Random.from(new SecureRandom()).nextInt(0, ADDRESSES.length)];
 
     @Override
     public void createProduct(NewProductInWarehouseRequest request) {
