@@ -17,45 +17,54 @@ public class ExceptionController {
             NoOrderFoundException.class,
             NoDeliveryFoundException.class,
     })
-    public ResponseEntity<ApiError> handleException(RuntimeException e) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        log.error("Not found: {}", e.getMessage());
-        return ResponseEntity.status(status)
-                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+    public ResponseEntity<ApiError> handleNotFoundException(RuntimeException e) {
+        log.warn("Not found: {}", e.getMessage());  // WARN, не ERROR
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiError.of("NOT_FOUND", e.getMessage(), 404));
     }
 
     @ExceptionHandler({
             SpecifiedProductAlreadyInWarehouseException.class,
             ProductInShoppingCartLowQuantityInWarehouse.class
     })
-    public ResponseEntity<ApiError> handleConflict(RuntimeException e) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        log.error("Conflict: {}", e.getMessage());
-        return ResponseEntity.status(status)
-                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+    public ResponseEntity<ApiError> handleConflictException(RuntimeException e) {
+        log.warn("Conflict: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiError.of("CONFLICT", e.getMessage(), 409));
     }
 
     @ExceptionHandler(ProductCartException.class)
     public ResponseEntity<ApiError> handleProductCartException(ProductCartException e) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        log.error("Invalid cart request: {}", e.getMessage());
-        return ResponseEntity.status(status)
-                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+        log.warn("Invalid cart request: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiError.of("BAD_REQUEST", e.getMessage(), 400));
     }
 
-    @ExceptionHandler(ProductCartException.class)
+    @ExceptionHandler(NotAuthorizedUserException.class)
     public ResponseEntity<ApiError> handleUnauthorizedException(NotAuthorizedUserException e) {
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
-        log.error("Authorization error: {}", e.getMessage());
-        return ResponseEntity.status(status)
-                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+        log.warn("Authorization error: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiError.of("UNAUTHORIZED", e.getMessage(), 401));
     }
 
     @ExceptionHandler(NotEnoughInfoInOrderToCalculateException.class)
     public ResponseEntity<ApiError> handleNotEnoughInfoException(NotEnoughInfoInOrderToCalculateException e) {
-        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
-        log.error("Not enough info: {}", e.getMessage());
-        return ResponseEntity.status(status)
-                .body(ApiError.of(status.name(), e.getMessage(), status.value()));
+        log.warn("Not enough info: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiError.of("UNPROCESSABLE_ENTITY", e.getMessage(), 422));
+    }
+
+    @ExceptionHandler(OrderCreationFailedException.class)
+    public ResponseEntity<ApiError> handleOrderCreationFailed(OrderCreationFailedException e) {
+        log.error("Order creation failed", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiError.of("ORDER_CREATION_FAILED", e.getMessage(), 500));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGenericException(Exception e) {
+        log.error("Unexpected server error", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiError.of("INTERNAL_ERROR", "An unexpected error occurred", 500));
     }
 }
