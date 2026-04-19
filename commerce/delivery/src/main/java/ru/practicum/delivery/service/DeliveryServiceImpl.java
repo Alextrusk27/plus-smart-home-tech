@@ -6,7 +6,6 @@ import ru.practicum.delivery.model.Delivery;
 import ru.practicum.delivery.model.mapper.DeliveryMapper;
 import ru.practicum.delivery.repository.DeliveryRepository;
 import ru.practicum.interaction.api.dto.request.DeliveryRequest;
-import ru.practicum.interaction.api.dto.response.OrderDto;
 import ru.practicum.interaction.api.enums.DeliveryState;
 import ru.practicum.interaction.api.exception.NoDeliveryFoundException;
 import ru.practicum.interaction.api.feign.OrderClient;
@@ -32,9 +31,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public BigDecimal deliveryCost(OrderDto order) {
-        Delivery delivery = deliveryRepository.findById(order.deliveryId())
-                .orElseThrow(() -> deliveryNotFound(order.deliveryId()));
+    public BigDecimal deliveryCost(UUID deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> deliveryNotFound(deliveryId));
 
         return baseCostWithWarehouse(delivery)
                 .multiply(fragileMultiplier(delivery))

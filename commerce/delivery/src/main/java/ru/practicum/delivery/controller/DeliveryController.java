@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.delivery.service.DeliveryService;
 import ru.practicum.interaction.api.api.DeliveryApi;
 import ru.practicum.interaction.api.dto.request.DeliveryRequest;
-import ru.practicum.interaction.api.dto.response.OrderDto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -31,10 +30,10 @@ public class DeliveryController implements DeliveryApi {
 
     @Override
     @PostMapping("/cost")
-    public BigDecimal deliveryCost(@RequestBody OrderDto order) {
-        log.info("Request to calculate delivery cost for order: {}", order.deliveryId());
-        var result = deliveryService.deliveryCost(order);
-        log.debug("Delivery cost calculated: {}. Delivery: {}", result, order.deliveryId());
+    public BigDecimal deliveryCost(@RequestBody UUID deliveryId) {
+        log.info("Request to calculate delivery cost for order: {}", deliveryId);
+        var result = deliveryService.deliveryCost(deliveryId);
+        log.debug("Delivery cost calculated: {}. Delivery: {}", result, deliveryId);
         return result;
     }
 

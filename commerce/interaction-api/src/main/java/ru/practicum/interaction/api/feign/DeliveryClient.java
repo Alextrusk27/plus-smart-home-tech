@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.practicum.interaction.api.api.DeliveryApi;
 import ru.practicum.interaction.api.dto.request.DeliveryRequest;
-import ru.practicum.interaction.api.dto.response.OrderDto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public interface DeliveryClient extends DeliveryApi {
 
     @Override
     @PostMapping("/cost")
-    BigDecimal deliveryCost(@RequestBody OrderDto order);
+    BigDecimal deliveryCost(@RequestBody UUID deliveryId);
 
     @Override
     @PostMapping("/picked")
