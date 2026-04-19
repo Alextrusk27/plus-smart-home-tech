@@ -104,14 +104,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto initPayment(UUID orderId) {
-        Order order = getOrderOrThrow(orderId);
-        paymentClient.payment(orderMapper.toDto(order));
-        return updateOrderState(order, OrderState.ON_PAYMENT);
-    }
-
-    @Override
-    public OrderDto paymentSuccess(UUID orderId) {
+    public OrderDto payment(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.PAID);
     }

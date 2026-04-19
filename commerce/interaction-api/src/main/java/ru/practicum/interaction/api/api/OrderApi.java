@@ -16,9 +16,8 @@ public interface OrderApi {
 
     OrderDto createOrder(String username, CreateNewOrderRequest request);
 
-    OrderDto initPayment(UUID orderId);
 
-    OrderDto paymentSuccess(UUID orderId);
+    OrderDto payment(UUID orderId);
 
     OrderDto paymentFailed(UUID orderId);
 

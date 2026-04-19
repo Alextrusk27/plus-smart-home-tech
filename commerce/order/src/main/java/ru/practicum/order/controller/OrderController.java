@@ -51,18 +51,9 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/payment")
-    public OrderDto initPayment(@RequestBody UUID orderId) {
-        log.info("Request to init payment for order: {}", orderId);
-        var result = orderService.initPayment(orderId);
-        log.debug("Payment for order {} initialized", orderId);
-        return result;
-    }
-
-    @Override
-    @PostMapping("/payment/success")
-    public OrderDto paymentSuccess(@RequestBody UUID orderId) {
+    public OrderDto payment(@RequestBody UUID orderId) {
         log.info("Processing payment success for order: {}", orderId);
-        var result = orderService.paymentSuccess(orderId);
+        var result = orderService.payment(orderId);
         writeStatusLog(orderId, result.state());
         return result;
     }
