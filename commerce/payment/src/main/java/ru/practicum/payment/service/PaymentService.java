@@ -9,9 +9,9 @@ import java.util.UUID;
 public interface PaymentService {
     PaymentDto payment(OrderDto order);
 
-    BigDecimal productCost(OrderDto order);
+    BigDecimal calculateProductCost(OrderDto order);
 
-    BigDecimal getTotalCost(OrderDto order);
+    BigDecimal calculateTotalCost(OrderDto order);
 
     void paymentSuccess(UUID orderId);
 

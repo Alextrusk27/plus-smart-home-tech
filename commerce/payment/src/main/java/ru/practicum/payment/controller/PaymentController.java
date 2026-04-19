@@ -32,7 +32,7 @@ public class PaymentController implements PaymentApi {
     @PostMapping("/productCost")
     public BigDecimal productCost(@RequestBody OrderDto order) {
         log.info("Request to calculate product cost from order: {}", order.orderId());
-        var result = paymentService.productCost(order);
+        var result = paymentService.calculateProductCost(order);
         log.debug("Product cost calculated: {}. Order: {}", result, order.orderId());
         return result;
     }
@@ -41,7 +41,7 @@ public class PaymentController implements PaymentApi {
     @PostMapping("/totalCost")
     public BigDecimal totalCost(@RequestBody OrderDto order) {
         log.info("Request to calculate total cost from order: {}", order.orderId());
-        var result = paymentService.getTotalCost(order);
+        var result = paymentService.calculateTotalCost(order);
         log.debug("Total cost calculated: {}. Order: {}", result, order.orderId());
         return result;
     }
