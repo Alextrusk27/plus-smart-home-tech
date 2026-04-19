@@ -58,34 +58,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDto createOrder(String username, CreateNewOrderRequest request) {
-        // 1. Проверка корзины
         checkShoppingCart(username, request);
-
-        // 2. Резервирование товара
         BookedProductsDto bookedProducts = reserveProductsInWarehouse(request);
-
-        // 3. Создание и первое сохранение заказа (чтобы получить ID)
         Order order = saveBaseOrder(request, username, bookedProducts);
 
         try {
-            // 4. Планирование доставки
-            UUID deliveryId = deliveryClient.planDelivery(DeliveryRequest.of(
-                    AddressRequest.of(request.deliveryAddress()),
-                    AddressRequest.of(warehouseClient.getAddress()),
-                    orderMapper.toDto(order)
-            ));
-
-            order.setDeliveryId(deliveryId);
-            order.setDeliveryPrice(deliveryClient.deliveryCost(deliveryId));
-
-            // 5. Расчёт стоимости и создание оплаты
-            order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
-            order.setTotalPrice(order.getProductPrice().add(order.getDeliveryPrice()));
-            order.setPaymentId(paymentClient.payment(orderMapper.toDto(order)).paymentId());
-
-            // 6. Деактивация корзины
+            planDelivery(request, order);
+            planPayment(order);
             shoppingCartClient.deactivateCart(username);
-
             return orderMapper.toDto(order);
         } catch (Exception e) {
             String failedStage = order.getPaymentId() != null ? "payment"
@@ -93,7 +73,6 @@ public class OrderServiceImpl implements OrderService {
                     : "warehouse";
             log.error("Order creation failed at stage: {} for user {}", failedStage, username, e);
 
-            // 1. Отмена оплаты (если оплата создана)
             if (order.getPaymentId() != null) {
                 try {
                     paymentClient.paymentFailed(order.getPaymentId());
@@ -104,7 +83,6 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
 
-            // 2. Отмена доставки (если доставка создана)
             if (order.getDeliveryId() != null) {
                 try {
                     deliveryClient.deliveryFailed(order.getDeliveryId());
@@ -115,7 +93,6 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
 
-            // 3. Отмена бронирования на складе
             try {
                 warehouseClient.acceptReturn(request.shoppingCart().products());
                 log.warn("Products returned to warehouse");
@@ -230,6 +207,23 @@ public class OrderServiceImpl implements OrderService {
         order.setDeliveryVolume(bookedProducts.deliveryVolume());
         order.setFragile(bookedProducts.fragile());
         return orderRepository.save(order);
+    }
+
+    private void planDelivery(CreateNewOrderRequest request, Order order) {
+        UUID deliveryId = deliveryClient.planDelivery(DeliveryRequest.of(
+                AddressRequest.of(request.deliveryAddress()),
+                AddressRequest.of(warehouseClient.getAddress()),
+                orderMapper.toDto(order)
+        ));
+
+        order.setDeliveryId(deliveryId);
+        order.setDeliveryPrice(deliveryClient.deliveryCost(deliveryId));
+    }
+
+    private void planPayment(Order order) {
+        order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
+        order.setTotalPrice(order.getProductPrice().add(order.getDeliveryPrice()));
+        order.setPaymentId(paymentClient.payment(orderMapper.toDto(order)).paymentId());
     }
 
     private OrderDto updateOrderState(Order order, OrderState state) {
