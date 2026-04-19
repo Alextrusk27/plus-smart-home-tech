@@ -61,8 +61,4 @@ public interface OrderClient extends OrderApi {
     @Override
     @PostMapping("/return")
     OrderDto returnProducts(@RequestBody ProductReturnRequest request);
-
-    @Override
-    @PostMapping("/calculate/total")
-    OrderDto calculateTotal(@RequestBody UUID orderId);
 }

@@ -39,9 +39,9 @@ public interface OrderService {
      * Локальный заказ в БД откатывается автоматически благодаря {@code @Transactional}.
      *
      * @param username имя пользователя, создающего заказ
-     * @param request данные заказа (адрес доставки, содержимое корзины)
+     * @param request  данные заказа (адрес доставки, содержимое корзины)
      * @return созданный заказ с идентификаторами доставки и платежа
-     * @throws CartNotFoundException если корзина не соответствует заказу
+     * @throws CartNotFoundException        если корзина не соответствует заказу
      * @throws OrderCreationFailedException при любой ошибке создания заказа
      */
     OrderDto createOrder(String username, CreateNewOrderRequest request);
@@ -63,6 +63,4 @@ public interface OrderService {
     OrderDto completed(UUID orderId);
 
     OrderDto canceled(UUID orderId);
-
-    OrderDto calculateTotal(UUID orderId);
 }

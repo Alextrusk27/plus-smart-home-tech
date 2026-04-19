@@ -33,6 +33,4 @@ public interface OrderApi {
     OrderDto canceled(UUID orderId);
 
     OrderDto returnProducts(ProductReturnRequest request);
-
-    OrderDto calculateTotal(UUID orderId);
 }

@@ -158,14 +158,6 @@ public class OrderServiceImpl implements OrderService {
         return updateOrderState(order, OrderState.PRODUCT_RETURNED);
     }
 
-    @Override
-    public OrderDto calculateTotal(UUID orderId) {
-        Order order = getOrderOrThrow(orderId);
-
-        // посчитать
-        return orderMapper.toDto(order);
-    }
-
     private void checkShoppingCart(String username, CreateNewOrderRequest request) {
         ShoppingCartDto cart = shoppingCartClient.getCart(username);
         if (!cart.products().equals(request.shoppingCart().products())) {

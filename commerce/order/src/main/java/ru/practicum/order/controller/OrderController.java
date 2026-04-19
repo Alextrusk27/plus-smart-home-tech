@@ -118,7 +118,7 @@ public class OrderController implements OrderApi {
         log.info("Processing order: {} canceled", orderId);
         var result = orderService.canceled(orderId);
         writeStatusLog(orderId, result.state());
-        return null;
+        return result;
     }
 
     @Override
@@ -128,15 +128,6 @@ public class OrderController implements OrderApi {
         var result = orderService.returnProducts(request);
         log.debug("Order {} successfully returned", request.orderId());
         return result;
-    }
-
-    @Override
-    @PostMapping("/calculate/total")
-    public OrderDto calculateTotal(@RequestBody UUID orderId) {
-        log.info("Calculating total price for order: {}", orderId);
-        var result = orderService.calculateTotal(orderId);
-        log.debug("Total price for order {} is {}", orderId, result.totalPrice());
-        return null;
     }
 
     private void writeStatusLog(UUID orderId, OrderState state) {
