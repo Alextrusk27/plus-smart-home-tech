@@ -52,8 +52,6 @@ public interface OrderService {
 
     OrderDto paymentFailed(UUID orderId);
 
-    OrderDto initAssembly(UUID orderId);
-
     OrderDto orderAssembled(UUID orderId);
 
     OrderDto orderAssemblyFailed(UUID orderId);

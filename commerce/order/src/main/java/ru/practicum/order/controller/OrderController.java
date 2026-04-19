@@ -69,15 +69,6 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/assembly")
-    public OrderDto initAssembly(@RequestBody UUID orderId) {
-        log.info("Request to init assembly for order: {}", orderId);
-        var result = orderService.initAssembly(orderId);
-        writeStatusLog(orderId, result.state());
-        return result;
-    }
-
-    @Override
-    @PostMapping("/assembly/success")
     public OrderDto assembled(@RequestBody UUID orderId) {
         log.info("Processing order assembled for order: {}", orderId);
         var result = orderService.orderAssembled(orderId);

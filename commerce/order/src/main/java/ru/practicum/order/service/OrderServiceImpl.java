@@ -116,15 +116,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto initAssembly(UUID orderId) {
-        Order order = getOrderOrThrow(orderId);
-
-        // запуск процесса сборки в warehouse
-
-        return updateOrderState(order, OrderState.ON_ASSEMBLY);
-    }
-
-    @Override
     public OrderDto orderAssembled(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.ASSEMBLED);

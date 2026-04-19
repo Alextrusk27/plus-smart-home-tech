@@ -36,10 +36,6 @@ public interface OrderClient extends OrderApi {
 
     @Override
     @PostMapping("/assembly")
-    OrderDto initAssembly(@RequestBody UUID orderId);
-
-    @Override
-    @PostMapping("/assembly/success")
     OrderDto assembled(@RequestBody UUID orderId);
 
     @Override

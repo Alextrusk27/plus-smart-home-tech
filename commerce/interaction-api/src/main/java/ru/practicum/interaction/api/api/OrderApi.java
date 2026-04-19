@@ -20,8 +20,6 @@ public interface OrderApi {
 
     OrderDto paymentFailed(UUID orderId);
 
-    OrderDto initAssembly(UUID orderId);
-
     OrderDto assembled(UUID orderId);
 
     OrderDto assemblyFailed(UUID orderId);
