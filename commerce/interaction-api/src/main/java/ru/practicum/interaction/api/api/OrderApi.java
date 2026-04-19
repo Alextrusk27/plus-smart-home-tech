@@ -16,7 +16,6 @@ public interface OrderApi {
 
     OrderDto createOrder(String username, CreateNewOrderRequest request);
 
-
     OrderDto payment(UUID orderId);
 
     OrderDto paymentFailed(UUID orderId);
@@ -26,8 +25,6 @@ public interface OrderApi {
     OrderDto assembled(UUID orderId);
 
     OrderDto assemblyFailed(UUID orderId);
-
-    OrderDto initDelivery(UUID orderId);
 
     OrderDto delivered(UUID orderId);
 

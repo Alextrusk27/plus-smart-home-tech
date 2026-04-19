@@ -48,10 +48,6 @@ public interface OrderClient extends OrderApi {
 
     @Override
     @PostMapping("/delivery")
-    OrderDto initDelivery(@RequestBody UUID orderId);
-
-    @Override
-    @PostMapping("/delivery/success")
     OrderDto delivered(@RequestBody UUID orderId);
 
     @Override

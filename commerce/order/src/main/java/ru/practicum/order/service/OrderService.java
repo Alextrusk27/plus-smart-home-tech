@@ -58,8 +58,6 @@ public interface OrderService {
 
     OrderDto orderAssemblyFailed(UUID orderId);
 
-    OrderDto initDelivery(UUID orderId);
-
     OrderDto orderDelivered(UUID orderId);
 
     OrderDto orderDeliveryFailed(UUID orderId);

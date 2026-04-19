@@ -96,15 +96,6 @@ public class OrderController implements OrderApi {
 
     @Override
     @PostMapping("/delivery")
-    public OrderDto initDelivery(@RequestBody UUID orderId) {
-        log.info("Request to init delivery for order: {}", orderId);
-        var result = orderService.initDelivery(orderId);
-        writeStatusLog(orderId, result.state());
-        return result;
-    }
-
-    @Override
-    @PostMapping("/delivery/success")
     public OrderDto delivered(@RequestBody UUID orderId) {
         log.info("Processing order delivered for order: {}", orderId);
         var result = orderService.orderDelivered(orderId);

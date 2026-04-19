@@ -137,12 +137,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto initDelivery(UUID orderId) {
-        Order order = getOrderOrThrow(orderId);
-        return updateOrderState(order, OrderState.ON_DELIVERY);
-    }
-
-    @Override
     public OrderDto orderDelivered(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.DELIVERED);
