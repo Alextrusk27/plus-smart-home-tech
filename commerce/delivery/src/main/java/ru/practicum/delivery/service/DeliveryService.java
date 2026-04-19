@@ -16,4 +16,6 @@ public interface DeliveryService {
     void deliverySuccessful(UUID orderId);
 
     void deliveryFailed(UUID orderId);
+
+    void deliveryCancelled(UUID orderId);
 }

@@ -4,5 +4,6 @@ public enum DeliveryState {
     CREATED,
     IN_PROGRESS,
     DELIVERED,
-    FAILED
+    FAILED,
+    CANCELLED
 }

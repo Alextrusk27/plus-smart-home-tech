@@ -63,4 +63,13 @@ public class DeliveryController implements DeliveryApi {
         deliveryService.deliveryFailed(orderId);
         log.debug("Delivery marked as failed. Order: {}", orderId);
     }
+
+    @Override
+    @PostMapping("/cancelled")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deliveryCancelled(@RequestBody UUID orderId) {
+        log.info("Request to mark delivery as cancelled for order: {}", orderId);
+        deliveryService.deliveryCancelled(orderId);
+        log.debug("Delivery marked as cancelled. Order: {}", orderId);
+    }
 }

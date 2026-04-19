@@ -15,4 +15,6 @@ public interface DeliveryApi {
     void deliverySuccessful(UUID orderId);
 
     void deliveryFailed(UUID orderId);
+
+    void deliveryCancelled(UUID orderId);
 }

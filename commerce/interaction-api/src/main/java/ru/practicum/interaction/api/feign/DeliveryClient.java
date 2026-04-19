@@ -31,4 +31,8 @@ public interface DeliveryClient extends DeliveryApi {
     @Override
     @PostMapping("/failed")
     void deliveryFailed(@RequestBody UUID orderId);
+
+    @Override
+    @PostMapping("/cancelled")
+    void deliveryCancelled(@RequestBody UUID orderId);
 }

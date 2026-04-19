@@ -9,6 +9,7 @@ import ru.practicum.interaction.api.dto.request.DeliveryRequest;
 import ru.practicum.interaction.api.enums.DeliveryState;
 import ru.practicum.interaction.api.exception.NoDeliveryFoundException;
 import ru.practicum.interaction.api.feign.OrderClient;
+import ru.practicum.interaction.api.feign.WarehouseClient;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryMapper deliveryMapper;
 
     private final OrderClient orderClient;
+    private final WarehouseClient warehouseClient;
 
     @Override
     public UUID planDelivery(DeliveryRequest request) {
@@ -71,6 +73,15 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setState(DeliveryState.FAILED);
         deliveryRepository.save(delivery);
         orderClient.deliveryFailed(orderId);
+    }
+
+    @Override
+    public void deliveryCancelled(UUID orderId) {
+        Delivery delivery = deliveryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> deliveryNotFound(orderId));
+
+        delivery.setState(DeliveryState.CANCELLED);
+        deliveryRepository.save(delivery);
     }
 
     private BigDecimal baseCostWithWarehouse(Delivery delivery) {
