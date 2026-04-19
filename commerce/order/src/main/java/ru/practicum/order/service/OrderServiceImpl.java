@@ -59,10 +59,13 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderDto createOrder(String username, CreateNewOrderRequest request) {
         checkShoppingCart(username, request);
-        BookedProductsDto bookedProducts = reserveProductsInWarehouse(request);
-        Order order = saveBaseOrder(request, username, bookedProducts);
+
+        Order order = orderMapper.toEntity(request);
+        order.setUsername(username);
+        orderRepository.save(order);
 
         try {
+            bookProducts(request, order);
             planDelivery(request, order);
             planPayment(order);
             shoppingCartClient.deactivateCart(username);
@@ -93,11 +96,13 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
 
-            try {
-                warehouseClient.acceptReturn(request.shoppingCart().products());
-                log.warn("Products returned to warehouse");
-            } catch (Exception returnException) {
-                log.error("CRITICAL: Failed to return products", returnException);
+            if (order.getDeliveryWeight() != null || order.getDeliveryVolume() != null || order.getFragile() != null) {
+                try {
+                    warehouseClient.acceptReturn(request.shoppingCart().products());
+                    log.warn("Products returned to warehouse for order {}", order.getOrderId());
+                } catch (Exception returnException) {
+                    log.error("CRITICAL: Failed to return products for order {}", order.getOrderId(), returnException);
+                }
             }
             throw new OrderCreationFailedException("Order creation failed: " + e.getMessage());
         }
@@ -170,13 +175,13 @@ public class OrderServiceImpl implements OrderService {
                 new AssemblyProductsForOrderRequest(request.shoppingCart().products(), null));
     }
 
-    private Order saveBaseOrder(CreateNewOrderRequest request, String username, BookedProductsDto bookedProducts) {
-        Order order = orderMapper.toEntity(request);
-        order.setUsername(username);
+    private void bookProducts(CreateNewOrderRequest request, Order order) {
+        BookedProductsDto bookedProducts = warehouseClient.assemblyForOrder(
+                new AssemblyProductsForOrderRequest(request.shoppingCart().products(), order.getOrderId()));
+
         order.setDeliveryWeight(bookedProducts.deliveryWeight());
         order.setDeliveryVolume(bookedProducts.deliveryVolume());
         order.setFragile(bookedProducts.fragile());
-        return orderRepository.save(order);
     }
 
     private void planDelivery(CreateNewOrderRequest request, Order order) {
