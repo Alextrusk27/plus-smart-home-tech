@@ -17,4 +17,6 @@ public interface PaymentApi {
     void paymentSuccess(UUID orderId);
 
     void paymentFailed(UUID orderId);
+
+    void paymentCancelled(UUID orderId);
 }

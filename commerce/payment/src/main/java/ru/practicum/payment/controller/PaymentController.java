@@ -52,7 +52,7 @@ public class PaymentController implements PaymentApi {
     public void paymentSuccess(@RequestBody UUID orderId) {
         log.info("Request to payment success from order: {}", orderId);
         paymentService.paymentSuccess(orderId);
-        log.debug("Payment successful: {}. Order: {}", orderId, orderId);
+        log.debug("Payment successful. Order: {}", orderId);
     }
 
     @Override
@@ -61,6 +61,15 @@ public class PaymentController implements PaymentApi {
     public void paymentFailed(@RequestBody UUID orderId) {
         log.info("Request to payment failed from order: {}", orderId);
         paymentService.paymentFailed(orderId);
-        log.debug("Payment failed: {}. Order: {}", orderId, orderId);
+        log.debug("Payment failed. Order: {}", orderId);
+    }
+
+    @Override
+    @PostMapping("/cancelled")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void paymentCancelled(@RequestBody UUID orderId) {
+        log.info("Request to payment cancelled from order: {}", orderId);
+        paymentService.paymentFailed(orderId);
+        log.debug("Payment cancelled. Order: {}", orderId);
     }
 }

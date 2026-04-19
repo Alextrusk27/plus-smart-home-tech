@@ -32,4 +32,8 @@ public interface PaymentClient extends PaymentApi {
     @Override
     @PostMapping("/failed")
     void paymentFailed(@RequestBody UUID orderId);
+
+    @Override
+    @PostMapping("/cancelled")
+    void paymentCancelled(@RequestBody UUID orderId);
 }

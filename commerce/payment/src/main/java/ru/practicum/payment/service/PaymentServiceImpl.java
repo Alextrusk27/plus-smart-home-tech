@@ -6,6 +6,7 @@ import ru.practicum.interaction.api.dto.response.OrderDto;
 import ru.practicum.interaction.api.dto.response.PaymentDto;
 import ru.practicum.interaction.api.dto.response.ProductDto;
 import ru.practicum.interaction.api.enums.PaymentState;
+import ru.practicum.interaction.api.exception.NoPaymentFoundException;
 import ru.practicum.interaction.api.exception.NotEnoughInfoInOrderToCalculateException;
 import ru.practicum.interaction.api.exception.ProductNotFoundException;
 import ru.practicum.interaction.api.feign.OrderClient;
@@ -102,13 +103,30 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void paymentSuccess(UUID paymentId) {
+        Payment payment = getPaymentOrThrow(paymentId);
+        payment.setState(PaymentState.SUCCESS);
+
         UUID orderId = orderClient.getOrderIdByPaymentId(paymentId);
         orderClient.paymentSuccess(orderId);
     }
 
     @Override
     public void paymentFailed(UUID paymentId) {
+        Payment payment = getPaymentOrThrow(paymentId);
+        payment.setState(PaymentState.FAILED);
+
         UUID orderId = orderClient.getOrderIdByPaymentId(paymentId);
         orderClient.paymentFailed(orderId);
+    }
+
+    @Override
+    public void paymentCancelled(UUID paymentId) {
+        Payment payment = getPaymentOrThrow(paymentId);
+        payment.setState(PaymentState.CANCELLED);
+    }
+
+    private Payment getPaymentOrThrow(UUID paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new NoPaymentFoundException("Payment %s not found".formatted(paymentId)));
     }
 }
