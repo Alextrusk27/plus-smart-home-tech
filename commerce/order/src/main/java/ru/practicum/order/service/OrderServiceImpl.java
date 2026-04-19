@@ -75,8 +75,8 @@ public class OrderServiceImpl implements OrderService {
 
             if (order.getPaymentId() != null) {
                 try {
-                    paymentClient.paymentFailed(order.getPaymentId());
-                    log.warn("Payment {} marked as FAILED", order.getPaymentId());
+                    paymentClient.paymentCancelled(order.getPaymentId());
+                    log.warn("Payment {} marked as CANCELLED", order.getPaymentId());
                 } catch (Exception paymentException) {
                     log.error("CRITICAL: Failed to refund payment {}",
                             order.getPaymentId(), paymentException);
@@ -85,8 +85,8 @@ public class OrderServiceImpl implements OrderService {
 
             if (order.getDeliveryId() != null) {
                 try {
-                    deliveryClient.deliveryFailed(order.getDeliveryId());
-                    log.warn("Delivery {} marked as FAILED", order.getDeliveryId());
+                    deliveryClient.deliveryCancelled(order.getDeliveryId());
+                    log.warn("Delivery {} marked as CANCELLED", order.getDeliveryId());
                 } catch (Exception deliverylException) {
                     log.error("CRITICAL: Failed to cancel delivery {}",
                             order.getDeliveryId(), deliverylException);
