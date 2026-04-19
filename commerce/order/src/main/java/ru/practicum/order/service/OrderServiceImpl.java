@@ -38,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryClient deliveryClient;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderDto> getOrders(String username, Pageable pageable) {
         checkUsername(username);
         return orderRepository.findAllByUsername(username, pageable)
@@ -45,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UUID getOrderIdByPayment(UUID paymentId) {
         if (paymentId == null) {
             throw new NoOrderFoundException("Payment id is null");
@@ -109,54 +111,63 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto payment(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.PAID);
     }
 
     @Override
+    @Transactional
     public OrderDto paymentFailed(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.PAYMENT_FAILED);
     }
 
     @Override
+    @Transactional
     public OrderDto orderAssembled(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.ASSEMBLED);
     }
 
     @Override
+    @Transactional
     public OrderDto orderAssemblyFailed(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.ASSEMBLY_FAILED);
     }
 
     @Override
+    @Transactional
     public OrderDto orderDelivered(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.DELIVERED);
     }
 
     @Override
+    @Transactional
     public OrderDto orderDeliveryFailed(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.DELIVERY_FAILED);
     }
 
     @Override
+    @Transactional
     public OrderDto completed(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.COMPLETED);
     }
 
     @Override
+    @Transactional
     public OrderDto canceled(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
         return updateOrderState(order, OrderState.CANCELED);
     }
 
     @Override
+    @Transactional
     public OrderDto returnProducts(ProductReturnRequest request) {
         Order order = getOrderOrThrow(request.orderId());
         warehouseClient.acceptReturn(request.products());
@@ -203,7 +214,6 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDto updateOrderState(Order order, OrderState state) {
         order.setState(state);
-        orderRepository.save(order);
         return orderMapper.toDto(order);
     }
 
