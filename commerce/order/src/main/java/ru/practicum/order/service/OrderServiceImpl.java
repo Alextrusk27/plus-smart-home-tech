@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.interaction.api.dto.request.AddressRequest;
-import ru.practicum.interaction.api.dto.request.CreateNewOrderRequest;
-import ru.practicum.interaction.api.dto.request.DeliveryRequest;
-import ru.practicum.interaction.api.dto.request.ProductReturnRequest;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.interaction.api.dto.request.*;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
 import ru.practicum.interaction.api.dto.response.OrderDto;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
@@ -16,6 +14,7 @@ import ru.practicum.interaction.api.enums.OrderState;
 import ru.practicum.interaction.api.exception.CartNotFoundException;
 import ru.practicum.interaction.api.exception.NoOrderFoundException;
 import ru.practicum.interaction.api.exception.NotAuthorizedUserException;
+import ru.practicum.interaction.api.exception.OrderCreationFailedException;
 import ru.practicum.interaction.api.feign.DeliveryClient;
 import ru.practicum.interaction.api.feign.PaymentClient;
 import ru.practicum.interaction.api.feign.ShoppingCartClient;
@@ -24,7 +23,6 @@ import ru.practicum.order.model.Order;
 import ru.practicum.order.model.mapper.OrderMapper;
 import ru.practicum.order.repository.OrderRepository;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -58,40 +56,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto createOrder(String username, CreateNewOrderRequest request) {
-        ShoppingCartDto shoppingCart = shoppingCartClient.getCart(username);
+        // 1. Проверка корзины
+        checkShoppingCart(username, request);
 
-        if (!shoppingCart.equals(request.shoppingCart())) {
-            throw new CartNotFoundException("Shopping cart not found");
+        // 2. Резервирование товара
+        BookedProductsDto bookedProducts = reserveProductsInWarehouse(request);
+
+        // 3. Создание и первое сохранение заказа (чтобы получить ID)
+        Order order = saveBaseOrder(request, username, bookedProducts);
+
+        try {
+            // 4. Планирование доставки
+            UUID deliveryId = deliveryClient.planDelivery(DeliveryRequest.of(
+                    AddressRequest.of(request.deliveryAddress()),
+                    AddressRequest.of(warehouseClient.getAddress()),
+                    orderMapper.toDto(order)
+            ));
+
+            order.setDeliveryId(deliveryId);
+            order.setDeliveryPrice(deliveryClient.deliveryCost(deliveryId));
+
+            // 5. Расчёт стоимости и создание оплаты
+            order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
+            order.setTotalPrice(order.getProductPrice().add(order.getDeliveryPrice()));
+            order.setPaymentId(paymentClient.payment(orderMapper.toDto(order)).paymentId());
+
+            // 6. Деактивация корзины
+            shoppingCartClient.deactivateCart(username);
+
+            return orderMapper.toDto(order);
+        } catch (Exception e) {
+            String failedStage = order.getPaymentId() != null ? "payment"
+                    : order.getDeliveryId() != null ? "delivery"
+                    : "warehouse";
+            log.error("Order creation failed at stage: {} for user {}", failedStage, username, e);
+
+            // 1. Отмена оплаты (если оплата создана)
+            if (order.getPaymentId() != null) {
+                try {
+                    paymentClient.paymentFailed(order.getPaymentId());
+                    log.warn("Payment {} marked as FAILED", order.getPaymentId());
+                } catch (Exception paymentException) {
+                    log.error("CRITICAL: Failed to refund payment {}",
+                            order.getPaymentId(), paymentException);
+                }
+            }
+
+            // 2. Отмена доставки (если доставка создана)
+            if (order.getDeliveryId() != null) {
+                try {
+                    deliveryClient.deliveryFailed(order.getDeliveryId());
+                    log.warn("Delivery {} marked as FAILED", order.getDeliveryId());
+                } catch (Exception deliverylException) {
+                    log.error("CRITICAL: Failed to cancel delivery {}",
+                            order.getDeliveryId(), deliverylException);
+                }
+            }
+
+            // 3. Отмена бронирования на складе
+            try {
+                warehouseClient.acceptReturn(request.shoppingCart().products());
+                log.warn("Products returned to warehouse");
+            } catch (Exception returnException) {
+                log.error("CRITICAL: Failed to return products", returnException);
+            }
+            throw new OrderCreationFailedException("Order creation failed: " + e.getMessage());
         }
-
-        Order order = orderMapper.toEntity(request);
-        order.setUsername(username);
-
-        BookedProductsDto bookedProducts = warehouseClient.checkProduct(shoppingCart);
-        // есть ли заказываемые товары на складе?
-
-        order.setDeliveryWeight(bookedProducts.deliveryWeight());
-        order.setDeliveryVolume(bookedProducts.deliveryVolume());
-        order.setFragile(bookedProducts.fragile());
-
-        order.setDeliveryPrice(BigDecimal.valueOf(5));
-
-
-        order.setProductPrice(paymentClient.productCost(orderMapper.toDto(order)));
-        order.setTotalPrice(paymentClient.totalCost(orderMapper.toDto(order)));
-
-        orderRepository.save(order);
-
-        deliveryClient.planDelivery(DeliveryRequest.of(
-                AddressRequest.of(request.deliveryAddress()),
-                AddressRequest.of(request.deliveryAddress()),
-                orderMapper.toDto(order)
-        ));
-
-        shoppingCartClient.deactivateCart(username);
-
-        return orderMapper.toDto(order);
     }
 
     @Override
@@ -167,9 +199,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto returnProducts(ProductReturnRequest request) {
         Order order = getOrderOrThrow(request.orderId());
-
-        // изменение количества товаров в Warehouse
-
+        warehouseClient.acceptReturn(request.products());
         return updateOrderState(order, OrderState.PRODUCT_RETURNED);
     }
 
@@ -179,6 +209,27 @@ public class OrderServiceImpl implements OrderService {
 
         // посчитать
         return orderMapper.toDto(order);
+    }
+
+    private void checkShoppingCart(String username, CreateNewOrderRequest request) {
+        ShoppingCartDto cart = shoppingCartClient.getCart(username);
+        if (!cart.products().equals(request.shoppingCart().products())) {
+            throw new CartNotFoundException("Shopping cart does not match");
+        }
+    }
+
+    private BookedProductsDto reserveProductsInWarehouse(CreateNewOrderRequest request) {
+        return warehouseClient.assemblyForOrder(
+                new AssemblyProductsForOrderRequest(request.shoppingCart().products(), null));
+    }
+
+    private Order saveBaseOrder(CreateNewOrderRequest request, String username, BookedProductsDto bookedProducts) {
+        Order order = orderMapper.toEntity(request);
+        order.setUsername(username);
+        order.setDeliveryWeight(bookedProducts.deliveryWeight());
+        order.setDeliveryVolume(bookedProducts.deliveryVolume());
+        order.setFragile(bookedProducts.fragile());
+        return orderRepository.save(order);
     }
 
     private OrderDto updateOrderState(Order order, OrderState state) {
