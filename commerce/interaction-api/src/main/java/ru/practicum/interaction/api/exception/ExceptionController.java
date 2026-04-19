@@ -16,9 +16,10 @@ public class ExceptionController {
             ProductNotFoundException.class,
             NoOrderFoundException.class,
             NoDeliveryFoundException.class,
+            NoPaymentFoundException.class
     })
     public ResponseEntity<ApiError> handleNotFoundException(RuntimeException e) {
-        log.warn("Not found: {}", e.getMessage());  // WARN, не ERROR
+        log.warn("Not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiError.of("NOT_FOUND", e.getMessage(), 404));
     }
