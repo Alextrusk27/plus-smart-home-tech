@@ -2,7 +2,9 @@ package ru.practicum.warehouse.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
+import ru.practicum.interaction.api.dto.request.AssemblyProductsForOrderRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
@@ -12,7 +14,7 @@ import ru.practicum.interaction.api.exception.ProductNotFoundException;
 import ru.practicum.interaction.api.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.practicum.warehouse.mapper.ProductMapper;
 import ru.practicum.warehouse.model.Product;
-import ru.practicum.warehouse.repository.ProductRepository;
+import ru.practicum.warehouse.repository.WarehouseRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,22 +28,64 @@ import static ru.practicum.interaction.api.constants.WarehouseConstants.CURRENT_
 @Service
 @RequiredArgsConstructor
 public class WarehouseServiceImpl implements WarehouseService {
-    private final ProductRepository productRepository;
+    private final WarehouseRepository warehouseRepository;
     private final ProductMapper productMapper;
 
     @Override
     public void createProduct(NewProductInWarehouseRequest request) {
-        if (productRepository.existsById(request.productId())) {
+        if (warehouseRepository.existsById(request.productId())) {
             throw new SpecifiedProductAlreadyInWarehouseException("Product '%s' already exists in warehouse"
                     .formatted(request.productId()));
         }
-        productRepository.save(productMapper.toEntity(request));
+        warehouseRepository.save(productMapper.toEntity(request));
     }
 
     @Override
     public BookedProductsDto checkProduct(ShoppingCartDto shoppingCart) {
+        return checkProduct(shoppingCart, false);
+    }
+
+    @Override
+    @Transactional
+    public void addProduct(AddProductToWarehouseRequest request) {
+        Product product = findProductOrThrow(request.productId());
+        product.setQuantity(product.getQuantity() + request.quantity());
+    }
+
+    @Override
+    @Transactional
+    public void returnProducts(Map<UUID, Integer> products) {
+        products.forEach(warehouseRepository::increaseQuantity);
+    }
+
+    @Override
+    @Transactional
+    public BookedProductsDto assemblyForOrder(AssemblyProductsForOrderRequest request) {
+        BookedProductsDto bookedProducts = checkProduct(new ShoppingCartDto(null, request.products()), true);
+        request.products().forEach(warehouseRepository::decreaseQuantity);
+        return bookedProducts;
+    }
+
+    @Override
+    public AddressDto getAddress() {
+        return new AddressDto(
+                CURRENT_ADDRESS,
+                CURRENT_ADDRESS,
+                CURRENT_ADDRESS,
+                CURRENT_ADDRESS,
+                CURRENT_ADDRESS
+        );
+    }
+
+    private Product findProductOrThrow(UUID productId) {
+        return warehouseRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product %s not found"
+                        .formatted(productId)));
+    }
+
+    private BookedProductsDto checkProduct(ShoppingCartDto shoppingCart, boolean locked) {
         Map<UUID, Integer> requested = shoppingCart.products();
-        List<Product> products = productRepository.findAllById(requested.keySet());
+        List<Product> products = findAllWithLock(requested.keySet(), locked);
 
         checkMissingProducts(requested, products);
 
@@ -69,24 +113,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         );
     }
 
-    @Override
-    public void addProduct(AddProductToWarehouseRequest request) {
-        Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new ProductNotFoundException("Product %s not found"
-                        .formatted(request.productId())));
-        product.setQuantity(request.quantity());
-        productRepository.save(product);
-    }
-
-    @Override
-    public AddressDto getAddress() {
-        return new AddressDto(
-                CURRENT_ADDRESS,
-                CURRENT_ADDRESS,
-                CURRENT_ADDRESS,
-                CURRENT_ADDRESS,
-                CURRENT_ADDRESS
-        );
+    private List<Product> findAllWithLock(Set<UUID> productIds, boolean locked) {
+        return locked ? warehouseRepository.findAllByIdWithLock(productIds)
+                : warehouseRepository.findAllById(productIds);
     }
 
     private void checkMissingProducts(Map<UUID, Integer> requested, List<Product> products) {

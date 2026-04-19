@@ -7,11 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.interaction.api.api.WarehouseApi;
 import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
+import ru.practicum.interaction.api.dto.request.AssemblyProductsForOrderRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
+import ru.practicum.interaction.api.dto.request.ShippedToDeliveryRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
 import ru.practicum.warehouse.service.WarehouseService;
+
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/warehouse")
@@ -38,6 +43,10 @@ public class WarehouseController implements WarehouseApi {
         return result;
     }
 
+    @PostMapping("/shipped")
+    public void shippedToDelivery(@RequestBody @Valid ShippedToDeliveryRequest request) {
+    }
+
     @PostMapping("/add")
     public void addProduct(@RequestBody @Valid AddProductToWarehouseRequest request) {
 
@@ -45,6 +54,31 @@ public class WarehouseController implements WarehouseApi {
                 request.quantity());
         warehouseService.addProduct(request);
         log.debug("Product '{}' quantity successfully changed", request.productId());
+    }
+
+    @PostMapping("/return")
+    public void acceptReturn(@RequestBody Map<UUID, Integer> products) {
+
+        log.info("Accepting return product(s) to warehouse: {}", products);
+        warehouseService.returnProducts(products);
+        log.info("Return accepted successfully");
+    }
+
+    @PostMapping("/assembly")
+    public BookedProductsDto assemblyForOrder(@RequestBody @Valid AssemblyProductsForOrderRequest request) {
+
+        log.info("Assembling order for {} products: {}",
+                request.products().size(),
+                request.products().keySet());
+
+        var result = warehouseService.assemblyForOrder(request);
+
+        log.debug("Order assembled successfully. Weight: {}, volume: {}, fragile: {}",
+                result.deliveryWeight(),
+                result.deliveryVolume(),
+                result.fragile());
+
+        return result;
     }
 
     @GetMapping("/address")
