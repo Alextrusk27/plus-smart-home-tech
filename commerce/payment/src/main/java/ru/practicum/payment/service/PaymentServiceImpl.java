@@ -2,6 +2,7 @@ package ru.practicum.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.interaction.api.dto.response.OrderDto;
 import ru.practicum.interaction.api.dto.response.PaymentDto;
 import ru.practicum.interaction.api.dto.response.ProductDto;
@@ -32,6 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderClient orderClient;
 
     @Override
+    @Transactional
     public PaymentDto payment(OrderDto order) {
         if (order.productPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException(("Payment calculation error: " +
@@ -66,6 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal calculateProductCost(OrderDto order) {
         Map<UUID, ProductDto> products = shoppingStoreClient.getProductsByIds(
                         new ArrayList<>(order.products().keySet()))
@@ -85,6 +88,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal calculateTotalCost(OrderDto order) {
         if (order.productPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException(("Total cost calculation error: " +
@@ -102,15 +106,17 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void paymentSuccess(UUID paymentId) {
         Payment payment = getPaymentOrThrow(paymentId);
         payment.setState(PaymentState.SUCCESS);
 
         UUID orderId = orderClient.getOrderIdByPaymentId(paymentId);
-        orderClient.paymentSuccess(orderId);
+        orderClient.payment(orderId);
     }
 
     @Override
+    @Transactional
     public void paymentFailed(UUID paymentId) {
         Payment payment = getPaymentOrThrow(paymentId);
         payment.setState(PaymentState.FAILED);
@@ -120,6 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void paymentCancelled(UUID paymentId) {
         Payment payment = getPaymentOrThrow(paymentId);
         payment.setState(PaymentState.CANCELLED);
