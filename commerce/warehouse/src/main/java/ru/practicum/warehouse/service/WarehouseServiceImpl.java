@@ -6,14 +6,19 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.interaction.api.dto.request.AddProductToWarehouseRequest;
 import ru.practicum.interaction.api.dto.request.AssemblyProductsForOrderRequest;
 import ru.practicum.interaction.api.dto.request.NewProductInWarehouseRequest;
+import ru.practicum.interaction.api.dto.request.ShippedToDeliveryRequest;
 import ru.practicum.interaction.api.dto.response.AddressDto;
 import ru.practicum.interaction.api.dto.response.BookedProductsDto;
 import ru.practicum.interaction.api.dto.response.ShoppingCartDto;
+import ru.practicum.interaction.api.exception.NoOrderBookingFoundException;
 import ru.practicum.interaction.api.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.practicum.interaction.api.exception.ProductNotFoundException;
 import ru.practicum.interaction.api.exception.SpecifiedProductAlreadyInWarehouseException;
+import ru.practicum.warehouse.mapper.OrderBookingMapper;
 import ru.practicum.warehouse.mapper.ProductMapper;
+import ru.practicum.warehouse.model.OrderBooking;
 import ru.practicum.warehouse.model.Product;
+import ru.practicum.warehouse.repository.OrderBookingRepository;
 import ru.practicum.warehouse.repository.WarehouseRepository;
 
 import java.math.BigDecimal;
@@ -29,7 +34,9 @@ import static ru.practicum.interaction.api.constants.WarehouseConstants.CURRENT_
 @RequiredArgsConstructor
 public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
+    private final OrderBookingRepository orderBookingRepository;
     private final ProductMapper productMapper;
+    private final OrderBookingMapper orderBookingMapper;
 
     @Override
     public void createProduct(NewProductInWarehouseRequest request) {
@@ -43,6 +50,16 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public BookedProductsDto checkProduct(ShoppingCartDto shoppingCart) {
         return checkProduct(shoppingCart, false);
+    }
+
+    @Override
+    @Transactional
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        OrderBooking booking = orderBookingRepository.findByOrderId(request.orderId())
+                .orElseThrow(() -> new NoOrderBookingFoundException("No bookings found for order %s"
+                        .formatted(request.orderId())));
+
+        booking.setDeliveryId(request.deliveryId());
     }
 
     @Override
@@ -62,6 +79,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     public BookedProductsDto assemblyForOrder(AssemblyProductsForOrderRequest request) {
         BookedProductsDto bookedProducts = checkProduct(new ShoppingCartDto(null, request.products()), true);
+        OrderBooking orderBooking = orderBookingMapper.toEntity(request);
+        orderBookingRepository.save(orderBooking);
         request.products().forEach(warehouseRepository::decreaseQuantity);
         return bookedProducts;
     }
