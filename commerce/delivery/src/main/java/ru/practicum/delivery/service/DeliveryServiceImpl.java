@@ -2,6 +2,7 @@ package ru.practicum.delivery.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.delivery.model.Delivery;
 import ru.practicum.delivery.model.mapper.DeliveryMapper;
 import ru.practicum.delivery.repository.DeliveryRepository;
@@ -28,15 +29,17 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final WarehouseClient warehouseClient;
 
     @Override
+    @Transactional
     public UUID planDelivery(DeliveryRequest request) {
         Delivery delivery = deliveryMapper.toEntity(request);
         return deliveryRepository.save(delivery).getDeliveryId();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal deliveryCost(UUID deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> deliveryNotFound(deliveryId));
+                .orElseThrow(() -> new NoDeliveryFoundException("No delivery found with id %s".formatted(deliveryId)));
 
         return baseCostWithWarehouse(delivery)
                 .multiply(fragileMultiplier(delivery))
@@ -46,43 +49,40 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public void deliveryPicked(UUID orderId) {
-        Delivery delivery = deliveryRepository.findByOrderId(orderId)
-                .orElseThrow(() -> deliveryNotFound(orderId));
-
+        Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setState(DeliveryState.IN_PROGRESS);
-        deliveryRepository.save(delivery);
         orderClient.assembled(orderId);
         warehouseClient.shippedToDelivery(new ShippedToDeliveryRequest(orderId, delivery.getDeliveryId()));
     }
 
     @Override
+    @Transactional
     public void deliverySuccessful(UUID orderId) {
-        Delivery delivery = deliveryRepository.findByOrderId(orderId)
-                .orElseThrow(() -> deliveryNotFound(orderId));
-
+        Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setState(DeliveryState.DELIVERED);
-        deliveryRepository.save(delivery);
         orderClient.delivered(orderId);
     }
 
     @Override
+    @Transactional
     public void deliveryFailed(UUID orderId) {
-        Delivery delivery = deliveryRepository.findByOrderId(orderId)
-                .orElseThrow(() -> deliveryNotFound(orderId));
-
+        Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setState(DeliveryState.FAILED);
-        deliveryRepository.save(delivery);
         orderClient.deliveryFailed(orderId);
     }
 
     @Override
+    @Transactional
     public void deliveryCancelled(UUID orderId) {
-        Delivery delivery = deliveryRepository.findByOrderId(orderId)
-                .orElseThrow(() -> deliveryNotFound(orderId));
-
+        Delivery delivery = getDeliveryByOrderId(orderId);
         delivery.setState(DeliveryState.CANCELLED);
-        deliveryRepository.save(delivery);
+    }
+
+    private Delivery getDeliveryByOrderId(UUID orderId) {
+        return deliveryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new NoDeliveryFoundException("No delivery found for order %s".formatted(orderId)));
     }
 
     private BigDecimal baseCostWithWarehouse(Delivery delivery) {
@@ -113,9 +113,5 @@ public class DeliveryServiceImpl implements DeliveryService {
                 delivery.getFromAddress().getStreet())
                 ? BigDecimal.ONE
                 : DISTANCE_MULTIPLIER;
-    }
-
-    private NoDeliveryFoundException deliveryNotFound(UUID orderId) {
-        return new NoDeliveryFoundException("No delivery found with id %s".formatted(orderId));
     }
 }
