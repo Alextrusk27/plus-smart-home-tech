@@ -6,6 +6,7 @@ import ru.practicum.delivery.model.Delivery;
 import ru.practicum.delivery.model.mapper.DeliveryMapper;
 import ru.practicum.delivery.repository.DeliveryRepository;
 import ru.practicum.interaction.api.dto.request.DeliveryRequest;
+import ru.practicum.interaction.api.dto.request.ShippedToDeliveryRequest;
 import ru.practicum.interaction.api.enums.DeliveryState;
 import ru.practicum.interaction.api.exception.NoDeliveryFoundException;
 import ru.practicum.interaction.api.feign.OrderClient;
@@ -51,8 +52,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         delivery.setState(DeliveryState.IN_PROGRESS);
         deliveryRepository.save(delivery);
-
-        // что-то со складом
+        orderClient.assembled(orderId);
+        warehouseClient.shippedToDelivery(new ShippedToDeliveryRequest(orderId, delivery.getDeliveryId()));
     }
 
     @Override
