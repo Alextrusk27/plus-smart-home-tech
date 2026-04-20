@@ -1,10 +1,13 @@
 package ru.practicum.delivery.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.delivery.model.Delivery;
 import ru.practicum.delivery.model.mapper.DeliveryMapper;
+import ru.practicum.delivery.repository.AddressRepository;
 import ru.practicum.delivery.repository.DeliveryRepository;
 import ru.practicum.interaction.api.dto.request.DeliveryRequest;
 import ru.practicum.interaction.api.dto.request.ShippedToDeliveryRequest;
@@ -22,7 +25,9 @@ import static ru.practicum.interaction.api.constants.WarehouseConstants.*;
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
+    private static final Logger log = LoggerFactory.getLogger(DeliveryServiceImpl.class);
     private final DeliveryRepository deliveryRepository;
+    private final AddressRepository addressRepository;
     private final DeliveryMapper deliveryMapper;
 
     private final OrderClient orderClient;
@@ -32,6 +37,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Transactional
     public UUID planDelivery(DeliveryRequest request) {
         Delivery delivery = deliveryMapper.toEntity(request);
+
+        addressRepository.findByRequest(request.fromAddress()).ifPresent(delivery::setFromAddress);
+        addressRepository.findByRequest(request.toAddress()).ifPresent(delivery::setToAddress);
+
         return deliveryRepository.save(delivery).getDeliveryId();
     }
 

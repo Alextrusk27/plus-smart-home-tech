@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
 
             if (order.getDeliveryId() != null) {
                 try {
-                    deliveryClient.deliveryCancelled(order.getDeliveryId());
+                    deliveryClient.deliveryCancelled(order.getOrderId());
                     log.warn("Delivery {} marked as CANCELLED", order.getDeliveryId());
                 } catch (Exception deliverylException) {
                     log.error("CRITICAL: Failed to cancel delivery {}",
@@ -181,11 +181,6 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private BookedProductsDto reserveProductsInWarehouse(CreateNewOrderRequest request) {
-        return warehouseClient.assemblyForOrder(
-                new AssemblyProductsForOrderRequest(request.shoppingCart().products(), null));
-    }
-
     private void bookProducts(CreateNewOrderRequest request, Order order) {
         BookedProductsDto bookedProducts = warehouseClient.assemblyForOrder(
                 new AssemblyProductsForOrderRequest(request.shoppingCart().products(), order.getOrderId()));
@@ -197,8 +192,8 @@ public class OrderServiceImpl implements OrderService {
 
     private void planDelivery(CreateNewOrderRequest request, Order order) {
         UUID deliveryId = deliveryClient.planDelivery(DeliveryRequest.of(
-                AddressRequest.of(request.deliveryAddress()),
                 AddressRequest.of(warehouseClient.getAddress()),
+                AddressRequest.of(request.deliveryAddress()),
                 orderMapper.toDto(order)
         ));
 

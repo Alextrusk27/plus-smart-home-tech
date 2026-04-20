@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS delivery (
     order_id             UUID         NOT NULL,
     state                VARCHAR(15)  NOT NULL,
     fragile              BOOL         NOT NULL,
-    weight               DECIMAL(6,2) NOT NULL,
-    volume               DECIMAL(6,2) NOT NULL,
+    weight               DECIMAL(20,2) NOT NULL,
+    volume               DECIMAL(20,2) NOT NULL,
     sender_address_id    BIGINT NOT NULL REFERENCES address (id) ON DELETE RESTRICT,
     recipient_address_id BIGINT NOT NULL REFERENCES address (id) ON DELETE RESTRICT,
 

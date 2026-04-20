@@ -45,6 +45,16 @@ public class WarehouseController implements WarehouseApi {
 
     @PostMapping("/shipped")
     public void shippedToDelivery(@RequestBody @Valid ShippedToDeliveryRequest request) {
+
+        log.info("Shipping order '{}' to delivery '{}'",
+                request.orderId(),
+                request.deliveryId());
+
+        warehouseService.shippedToDelivery(request);
+
+        log.debug("Order '{}' successfully shipped to delivery '{}'",
+                request.orderId(),
+                request.deliveryId());
     }
 
     @PostMapping("/add")
@@ -61,7 +71,7 @@ public class WarehouseController implements WarehouseApi {
 
         log.info("Accepting return product(s) to warehouse: {}", products);
         warehouseService.returnProducts(products);
-        log.info("Return accepted successfully");
+        log.debug("Return accepted successfully");
     }
 
     @PostMapping("/assembly")

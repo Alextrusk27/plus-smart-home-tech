@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS payments (
     payment_id     UUID PRIMARY KEY,
-    total_payment  DECIMAL(6,2),
-    products_total DECIMAL(6,2),
-    delivery_total DECIMAL(6,2),
+    total_payment  DECIMAL(12,2),
+    products_total DECIMAL(12,2),
+    delivery_total DECIMAL(12,2),
     state          VARCHAR(10),
 
     CONSTRAINT chk_total_payment_positive  CHECK (total_payment > 0),
