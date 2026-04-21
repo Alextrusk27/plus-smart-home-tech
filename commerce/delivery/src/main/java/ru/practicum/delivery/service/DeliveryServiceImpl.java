@@ -1,8 +1,7 @@
 package ru.practicum.delivery.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.delivery.model.Delivery;
@@ -24,8 +23,8 @@ import static ru.practicum.interaction.api.constants.WarehouseConstants.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeliveryServiceImpl implements DeliveryService {
-    private static final Logger log = LoggerFactory.getLogger(DeliveryServiceImpl.class);
     private final DeliveryRepository deliveryRepository;
     private final AddressRepository addressRepository;
     private final DeliveryMapper deliveryMapper;
@@ -49,11 +48,18 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new NoDeliveryFoundException("No delivery found with id %s".formatted(deliveryId)));
 
-        return baseCostWithWarehouse(delivery)
+        log.debug("Calculating delivery cost for delivery {}, order {}",
+                deliveryId, delivery.getOrderId());
+
+        BigDecimal result = baseCostWithWarehouse(delivery)
                 .multiply(fragileMultiplier(delivery))
                 .add(weightCost(delivery))
                 .add(volumeCost(delivery))
                 .multiply(distanceMultiplier(delivery));
+
+        log.debug("Delivery cost for order {}: {}", delivery.getOrderId(), result);
+
+        return result;
     }
 
     @Override
@@ -94,32 +100,55 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     private BigDecimal baseCostWithWarehouse(Delivery delivery) {
-        return switch (delivery.getFromAddress().getCity()) {
+        String city = delivery.getFromAddress().getCity();
+
+        BigDecimal result = switch (city) {
             case WAREHOUSE_1_ADDRESS -> BASE_DELIVERY_COST.add(BASE_DELIVERY_COST.multiply(WAREHOUSE_1_RATE));
             case WAREHOUSE_2_ADDRESS -> BASE_DELIVERY_COST.add(BASE_DELIVERY_COST.multiply(WAREHOUSE_2_RATE));
             default -> throw new IllegalStateException("Unexpected warehouse: %s"
-                    .formatted(delivery.getFromAddress().getCity()));
+                    .formatted(city));
         };
+
+        log.trace("Base cost with warehouse for order {}: city {}, result {}", delivery.getOrderId(), city, result);
+        return result;
     }
 
     private BigDecimal fragileMultiplier(Delivery delivery) {
-        return Boolean.TRUE.equals(delivery.getFragile())
+        BigDecimal result = Boolean.TRUE.equals(delivery.getFragile())
                 ? FRAGILE_MULTIPLIER
                 : BigDecimal.ONE;
+
+        log.trace("Fragile multiplier for order {}: fragile {}, result {}",
+                delivery.getOrderId(), delivery.getFragile(), result);
+        return result;
     }
 
     private BigDecimal weightCost(Delivery delivery) {
-        return delivery.getDeliveryWeight().multiply(WEIGHT_RATE);
+        BigDecimal weight = delivery.getDeliveryWeight();
+        BigDecimal result = weight.multiply(WEIGHT_RATE);
+
+        log.trace("Weight cost for order {}: weight {}, rate {}, result {}",
+                delivery.getOrderId(), weight, WEIGHT_RATE, result);
+        return result;
     }
 
     private BigDecimal volumeCost(Delivery delivery) {
-        return delivery.getDeliveryVolume().multiply(VOLUME_RATE);
+        BigDecimal volume = delivery.getDeliveryVolume();
+        BigDecimal result = volume.multiply(VOLUME_RATE);
+
+        log.trace("Volume cost for order {}: volume {}, rate {}, result {}",
+                delivery.getOrderId(), volume, VOLUME_RATE, result);
+        return result;
     }
 
     private BigDecimal distanceMultiplier(Delivery delivery) {
-        return delivery.getToAddress().getStreet().equals(
-                delivery.getFromAddress().getStreet())
-                ? BigDecimal.ONE
-                : DISTANCE_MULTIPLIER;
+        String fromStreet = delivery.getFromAddress().getStreet();
+        String toStreet = delivery.getToAddress().getStreet();
+        boolean sameStreet = fromStreet.equals(toStreet);
+        BigDecimal result = sameStreet ? BigDecimal.ONE : DISTANCE_MULTIPLIER;
+
+        log.debug("Distance multiplier for order {}: from {}, to {}, same street is {}, result {}",
+                delivery.getOrderId(), fromStreet, toStreet, sameStreet, result);
+        return result;
     }
 }
