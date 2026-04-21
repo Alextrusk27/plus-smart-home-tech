@@ -68,7 +68,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BigDecimal calculateProductCost(OrderDto order) {
         Map<UUID, ProductDto> products = shoppingStoreClient.getProductsByIds(
                         new ArrayList<>(order.products().keySet()))
@@ -88,7 +87,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BigDecimal calculateTotalCost(OrderDto order) {
         if (order.productPrice() == null) {
             throw new NotEnoughInfoInOrderToCalculateException(("Total cost calculation error: " +

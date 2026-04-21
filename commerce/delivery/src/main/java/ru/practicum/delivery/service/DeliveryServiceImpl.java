@@ -45,7 +45,6 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BigDecimal deliveryCost(UUID deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new NoDeliveryFoundException("No delivery found with id %s".formatted(deliveryId)));

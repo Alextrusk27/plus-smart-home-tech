@@ -38,7 +38,6 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryClient deliveryClient;
 
     @Override
-    @Transactional(readOnly = true)
     public Page<OrderDto> getOrders(String username, Pageable pageable) {
         checkUsername(username);
         return orderRepository.findAllByUsername(username, pageable)
@@ -46,7 +45,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UUID getOrderIdByPayment(UUID paymentId) {
         if (paymentId == null) {
             throw new NoOrderFoundException("Payment id is null");
