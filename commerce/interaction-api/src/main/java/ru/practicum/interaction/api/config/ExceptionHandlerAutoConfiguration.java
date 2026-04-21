@@ -2,13 +2,13 @@ package ru.practicum.interaction.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.practicum.interaction.api.exception.ExceptionHandler;
+import ru.practicum.interaction.api.exception.ExceptionController;
 
 @Configuration
 public class ExceptionHandlerAutoConfiguration {
 
     @Bean
-    public ExceptionHandler exceptionHandler() {
-        return new ExceptionHandler();
+    public ExceptionController exceptionController() {
+        return new ExceptionController();
     }
 }

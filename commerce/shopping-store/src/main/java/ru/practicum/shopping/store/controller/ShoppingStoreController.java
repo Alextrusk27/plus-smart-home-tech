@@ -15,6 +15,7 @@ import ru.practicum.interaction.api.enums.ProductCategory;
 import ru.practicum.interaction.api.enums.QuantityState;
 import ru.practicum.shopping.store.service.ShoppingStoreService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +32,14 @@ public class ShoppingStoreController implements ShoppingStoreApi {
         log.debug("Product fetched successfully: id={}, name={}",
                 productDto.productId(), productDto.productName());
         return productDto;
+    }
+
+    @GetMapping("/batch")
+    public List<ProductDto> getProductsByIds(@RequestParam List<UUID> productIds) {
+        log.info("Fetching products by ids: {}", productIds);
+        var products = shoppingStoreService.getProductsByIds(productIds);
+        log.debug("Products fetched successfully: {} items", products.size());
+        return products;
     }
 
     @GetMapping

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS cart_products (
     CONSTRAINT chk_quantity_positive CHECK (quantity > 0)
 );
 
-CREATE UNIQUE INDEX idx_unique_active_cart_per_user
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_active_cart_per_user
 ON carts (username)
 WHERE is_active = true;
 

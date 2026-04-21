@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public record ApiError(
-    String error,
-    String message,
-    int status,
-    String timestamp
+        String error,
+        String message,
+        int status,
+        String timestamp
 ) {
     public static ApiError of(String error, String message, int status) {
         return new ApiError(

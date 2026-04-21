@@ -5,17 +5,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.interaction.api.enums.ProductCategory;
-import ru.practicum.interaction.api.enums.ProductState;
-import ru.practicum.interaction.api.enums.QuantityState;
 import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.interaction.api.dto.response.ProductDto;
+import ru.practicum.interaction.api.enums.ProductCategory;
+import ru.practicum.interaction.api.enums.ProductState;
+import ru.practicum.interaction.api.enums.QuantityState;
 import ru.practicum.interaction.api.exception.ProductNotFoundException;
 import ru.practicum.shopping.store.mapper.ProductMapper;
 import ru.practicum.shopping.store.model.Product;
 import ru.practicum.shopping.store.repository.ProductRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,6 +32,14 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
         return productRepository.findById(productId)
                 .map(productMapper::toDto)
                 .orElseThrow(() -> notFound(productId));
+    }
+
+    @Override
+    public List<ProductDto> getProductsByIds(List<UUID> productIds) {
+        return productRepository.findAllById(productIds)
+                .stream()
+                .map(productMapper::toDto)
+                .toList();
     }
 
     @Override

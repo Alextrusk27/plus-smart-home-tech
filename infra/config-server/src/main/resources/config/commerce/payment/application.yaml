@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5438/payment_db
+    username: ${DB_USER:payment}
+    password: ${DB_PASSWORD:payment}
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        ddl-auto: validate

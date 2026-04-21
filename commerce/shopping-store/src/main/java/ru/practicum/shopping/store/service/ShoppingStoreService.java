@@ -2,17 +2,20 @@ package ru.practicum.shopping.store.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.interaction.api.enums.ProductCategory;
-import ru.practicum.interaction.api.enums.QuantityState;
 import ru.practicum.interaction.api.dto.request.CreateProductRequest;
 import ru.practicum.interaction.api.dto.request.UpdateProductRequest;
 import ru.practicum.interaction.api.dto.response.ProductDto;
+import ru.practicum.interaction.api.enums.ProductCategory;
+import ru.practicum.interaction.api.enums.QuantityState;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShoppingStoreService {
 
     ProductDto getProduct(UUID productId);
+
+    List<ProductDto> getProductsByIds(List<UUID> productIds);
 
     Page<ProductDto> getProducts(ProductCategory category, Pageable pageable);
 
